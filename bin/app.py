@@ -19,7 +19,8 @@ def parse_command_line_args():
     parser.add_argument('--host', required=True, dest='host', action='store', help='IMAP host connect to')
     parser.add_argument('--username', required=True, dest='username', action='store', help='Username to login with')
     parser.add_argument('--password', required=True, dest='password', action='store', help='Password to login with')
-    parser.add_argument('--port', dest='port', action='store', type=int, default=993, help='IMAP port to use (default is 143, or 993 for SSL)')
+    parser.add_argument('--port', dest='port', action='store', type=int, default=993,
+                        help='IMAP port to use (default is 143, or 993 for SSL)')
     parser.add_argument('--ssl', dest='ssl', action='store_true', default=True, help='Use SSL connection')
     parser.add_argument('--file', dest='file', action='store', default=None, help='Config file (same as livetest)')
     parser.add_argument('--version', action='version', version='0.00001')
@@ -71,7 +72,7 @@ class DemoFrame(Frame):
         layout.add_widget(self._header)
         layout.add_widget(self._list)
         layout.add_widget(
-                Label("Press `<`/`>` to change sort, `r` to toggle order, or `q` to quit."))
+            Label("Press `<`/`>` to change sort, `r` to toggle order, or `q` to quit."))
         self.fix()
 
         # Add my own colour palette
@@ -159,32 +160,182 @@ class DemoFrame(Frame):
     @property
     def frame_update_count(self):
         # Refresh once every 2 seconds by default.
-        return 40
-#
-# def main():
-#     args = parse_command_line_args()
-#     print('Connecting...')
-#     # client = create_client_from_config(args)
-#     server = IMAPClient(args.host, use_uid=True, ssl=args.ssl)
-#     server.login(args.username, args.password)
-#     print('Connected.')
-#
-#     select_info = server.select_folder('INBOX')
-#     print('%d messages in INBOX' % select_info[b'EXISTS'])
-#
-#     messages = server.search([b'NOT', b'DELETED'])
-#     print("%d messages that aren't deleted" % len(messages))
-#
-#
-# if __name__ == "__main__":
-#     main()
+        return 50
 
-def demo(screen):
-    screen.play([Scene([DemoFrame(screen)], -1)], stop_on_resize=True)
 
-while True:
-    try:
-        Screen.wrapper(demo, catch_interrupt=True)
-        sys.exit(0)
-    except ResizeScreenError:
-        pass
+def main():
+    args = parse_command_line_args()
+    print('Connecting...')
+    # client = create_client_from_config(args)
+    server = IMAPClient(args.host, use_uid=True, ssl=args.ssl)
+    server.login(args.username, args.password)
+    print('Connected.')
+
+    select_info = server.select_folder('INBOX')
+    print('%d messages in INBOX' % select_info[b'EXISTS'])
+
+    messages = server.search([b'NOT', b'DELETED'])
+    print("%d messages that aren't deleted" % len(messages))
+
+    print(server.search(['KEYWORD', 'test']))
+
+    server.add_flags([1], ['test'])
+    print(server.search(['KEYWORD', 'test']))
+
+    server.remove_flags([1], ['test'])
+    print(server.search(['KEYWORD', 'test']))
+
+    x = server.fetch([141], data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>'])
+
+    # das hier mit attachment
+    # http://stackoverflow.com/questions/6225763/downloading-multiple-attachments-using-imaplib
+    x = server.fetch([139], data=['BODYSTRUCTURE'])
+    f = x[139][b'BODYSTRUCTURE']
+    len(f[0])
+
+
+    # seach, see https://tools.ietf.org/html/rfc3501.html#section-6.4.4
+
+    # ALL
+    #      All messages in the mailbox; the default initial key for
+    #      ANDing.
+    #
+    #   ANSWERED
+    #      Messages with the \Answered flag set.
+    #
+    # BCC <string>
+    #      Messages that contain the specified string in the envelope
+    #      structure's BCC field.
+    #
+    #   BEFORE <date>
+    #      Messages whose internal date (disregarding time and timezone)
+    #      is earlier than the specified date.
+    #
+    #   BODY <string>
+    #      Messages that contain the specified string in the body of the
+    #      message.
+    #
+    #   CC <string>
+    #      Messages that contain the specified string in the envelope
+    #      structure's CC field.
+    #
+    #   DELETED
+    #      Messages with the \Deleted flag set.
+    #
+    #   DRAFT
+    #      Messages with the \Draft flag set.
+    #
+    #   FLAGGED
+    #      Messages with the \Flagged flag set.
+    #
+    #   FROM <string>
+    #      Messages that contain the specified string in the envelope
+    #      structure's FROM field.
+    #
+    #   HEADER <field-name> <string>
+    #      Messages that have a header with the specified field-name (as
+    #      defined in [RFC-2822]) and that contains the specified string
+    #      in the text of the header (what comes after the colon).  If the
+    #      string to search is zero-length, this matches all messages that
+    #      have a header line with the specified field-name regardless of
+    #      the contents.
+    #
+    #   KEYWORD <flag>
+    #      Messages with the specified keyword flag set.
+    #
+    #   LARGER <n>
+    #      Messages with an [RFC-2822] size larger than the specified
+    #      number of octets.
+    #
+    #   NEW
+    #      Messages that have the \Recent flag set but not the \Seen flag.
+    #      This is functionally equivalent to "(RECENT UNSEEN)".
+    #
+    # NOT <search-key>
+    #    Messages that do not match the specified search key.
+    #
+    # OLD
+    #    Messages that do not have the \Recent flag set.  This is
+    #    functionally equivalent to "NOT RECENT" (as opposed to "NOT
+    #    NEW").
+    #
+    # ON <date>
+    #    Messages whose internal date (disregarding time and timezone)
+    #    is within the specified date.
+    #
+    # OR <search-key1> <search-key2>
+    #    Messages that match either search key.
+    #
+    # RECENT
+    #    Messages that have the \Recent flag set.
+    #
+    # SEEN
+    #    Messages that have the \Seen flag set.
+    #
+    # SENTBEFORE <date>
+    #    Messages whose [RFC-2822] Date: header (disregarding time and
+    #    timezone) is earlier than the specified date.
+    #
+    # SENTON <date>
+    #    Messages whose [RFC-2822] Date: header (disregarding time and
+    #    timezone) is within the specified date.
+    #
+    # SENTSINCE <date>
+    #    Messages whose [RFC-2822] Date: header (disregarding time and
+    #    timezone) is within or later than the specified date.
+    #
+    # SINCE <date>
+    #    Messages whose internal date (disregarding time and timezone)
+    #    is within or later than the specified date.
+    #
+    # SMALLER <n>
+    #    Messages with an [RFC-2822] size smaller than the specified
+    #    number of octets.
+    #
+    # SUBJECT <string>
+    #    Messages that contain the specified string in the envelope
+    #    structure's SUBJECT field.
+    #
+    # TEXT <string>
+    #    Messages that contain the specified string in the header or
+    #    body of the message.
+    #
+    # TO <string>
+    #    Messages that contain the specified string in the envelope
+    #    structure's TO field.
+    #
+    # UID <sequence set>
+    #    Messages with unique identifiers corresponding to the specified
+    #    unique identifier set.  Sequence set ranges are permitted.
+    #
+    # UNANSWERED
+    #    Messages that do not have the \Answered flag set.
+    #
+    # UNDELETED
+    #    Messages that do not have the \Deleted flag set.
+    #
+    # UNDRAFT
+    #    Messages that do not have the \Draft flag set.
+    #
+    # UNFLAGGED
+    #    Messages that do not have the \Flagged flag set.
+    #
+    # UNKEYWORD <flag>
+    #    Messages that do not have the specified keyword flag set.
+    #
+    # UNSEEN
+    #    Messages that do not have the \Seen flag set.
+
+
+if __name__ == "__main__":
+    main()
+    #
+    # def demo(screen):
+    #     screen.play([Scene([DemoFrame(screen)], -1)], stop_on_resize=True)
+    #
+    # while True:
+    #     try:
+    #         Screen.wrapper(demo, catch_interrupt=True)
+    #         sys.exit(0)
+    #     except ResizeScreenError:
+    #         pass
