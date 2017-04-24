@@ -400,7 +400,7 @@ class IMAPClient(object):
 
         A ``XLIST`` response could look something like::
 
-            [((b'\\HasNoChildren', b'\\Inbox'), b'/', u'Inbox'),
+            [((b'\\HasNoChildren', b'\\MailBox'), b'/', u'MailBox'),
              ((b'\\Noselect', b'\\HasChildren'), b'/', u'[Gmail]'),
              ((b'\\HasNoChildren', b'\\AllMail'), b'/', u'[Gmail]/All Mail'),
              ((b'\\HasNoChildren', b'\\Drafts'), b'/', u'[Gmail]/Drafts'),
