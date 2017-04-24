@@ -4,15 +4,19 @@ import curses
 import datetime
 import email
 import imaplib
-from email.header import Header, decode_header, make_header
+import os
+from email.header import decode_header, make_header
 import sys
+from time import strftime
+from typing import List
+
 import toolz
 import npyscreen
 from net.imap.imapclient import IMAPClient
-
+from net.imap.response_types import Address, BodyData
 
 IMAP_SEARCH_FIELDS = {
-    'ALL': str,
+    # 'ALL': str,
     'ANSWERED': None,
     'BCC': str,
     'BEFORE': datetime.date,
@@ -230,7 +234,103 @@ print(server.search(['KEYWORD', 'test']))
 #     else:
 #         continue
 #
-# m140 = server.fetch([140], data=['ENVELOPE', 'BODY', 'FLAGS', 'RFC822.SIZE'])
+#m140 = server.fetch([messages[-1]], data=['ENVELOPE', 'BODY', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
+m140 = server.fetch([messages[-4]], data=['RFC822'])
+
+
+
+def walk_parts(msg):
+    for part in msg.walk():
+
+        print(part.get_content_type())
+
+
+    for part in msg.walk():
+        if part.is_multipart():
+            continue
+        dtypes = part.get_params(None, 'Content-Disposition')
+        if not dtypes:
+            if part.get_content_type() == 'text/plain':  # .get_content_type()
+                continue
+
+            ctypes = part.get_params()
+            if not ctypes:
+                continue
+            for key, val in ctypes:
+                if key.lower() == 'name':
+                    filename = gen_filename(val, part.get_content_type(), count)
+                    break
+            else:
+                continue
+        else:
+            attachment, filename = None, None
+            for key, val in dtypes:
+                key = key.lower()
+                if key == 'filename':
+                    filename = val
+                if key == 'attachment':
+                    attachment = 1
+            if not attachment:
+                continue
+            filename = gen_filename(filename, part.get_content_type(), count)
+
+        try:
+            data = part.get_payload(decode=1)
+        except:
+            typ, val = sys.exc_info()[:2]
+            print("Message %s attachment decode error: for %s ``%s''"
+                 % (str(val), part.get_content_type(), filename))
+            continue
+
+        if not data:
+            print("Could not decode attachment %s for %s" % (part.get_content_type(), filename))
+            continue
+
+        if type(data) is type(msg):
+            count = walk_parts(data)
+            continue
+
+        if True:  # save attacj
+            exists = "0"
+
+            print(data) # contains
+
+            # try:
+            #     curdir = os.getcwd()
+            #     list = os.listdir('.\\')
+            #     for name in list:
+            #         if name == addr:
+            #             exists = "1"
+            #             break
+            #     if exists == "1":
+            #         write_file(filename, addr, data)
+            #         os.chdir(curdir)
+            #     else:
+            #         os.mkdir(addr)
+            #         write_file(filename, addr, data)
+            #         os.chdir(curdir)
+            #         exists == "0"
+            #         os.chdir(curdir)
+            # except IOError:
+            #     print('Could not create "%s":' % (filename))
+
+
+
+
+
+
+# msg = email.message_from_string(m140[140][b'BODYSTRUCTURE'].decode('utf8'))
+
+walk_parts(m140)
+# for part in msg.walk():
+#     if part.is_multipart():
+#         continue
+
+#For example, a simple text message of 48 lines and 2279 octets
+ # can have a body structure of: ("TEXT" "PLAIN" ("CHARSET"
+ # "US-ASCII") NIL NIL "7BIT" 2279 48)
+
+
 #
 # x = server.fetch([141], data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>'])
 # server.fetch([140], data=['BODY[1]'])[140]
@@ -243,12 +343,12 @@ print(server.search(['KEYWORD', 'test']))
 
 
 # das hier mit attachment
-# http://stackoverflow.com/questions/6225763/downloading-multiple-attachments-using-imaplib
-# x = server.fetch([139], data=['BODYSTRUCTURE'])
-# f = x[139][b'BODYSTRUCTURE']
+    # http://stackoverflow.com/questions/6225763/downloading-multiple-attachments-using-imaplib
+    # x = server.fetch([139], data=['BODYSTRUCTURE'])
+    # f = x[139][b'BODYSTRUCTURE']
 
 
-def process_command(query):
+def process_command(query: str) -> List[int]:
     if query == 'quit' or query == 'q':
         sys.exit(1)
     if query == 'help':
@@ -290,19 +390,9 @@ def process_command(query):
             pass
 
     return mails
-#
-#
-# def process_subject(data):
-#     # return data.decode('utf8').replace('Subject: ', '').strip()
-#     decoded = data.decode('utf8').strip()
-#
-#     sqe = decode_header(decoded)
-#
-#     return str(make_header(sqe)).replace('Subject: ', '')
 
 
-
-def process_from(data):
+def process_from(data: Address) -> str:
     name = data.name.decode('utf8') if data.name else ''
     if name.startswith('='):
         name = make_header(decode_header(name))
@@ -313,15 +403,14 @@ def process_from(data):
     # return data.decode('utf8').replace('From: ', '').strip()
 
 
-
-def process_subject(data):
+def process_subject(data: bytes) -> str:
 
     name = make_header(decode_header(data.decode('utf8')))
     return name
     # return data.decode('utf8').replace('From: ', '').strip()
 
 
-def process_body(k, data):
+def process_body(k: int, data: BodyData) -> str:
     content = ''
     if data.is_multipart:
 
@@ -334,28 +423,134 @@ def process_body(k, data):
     return content
 
 
-def process_size(data):
+def process_size(data) -> int:
     return int(data)  # todo make human readable
 
 
-def process_flags(data):
+def process_flags(data) -> str:
     return data  # todo split and show nicely
 
+#
+# def write_file(filename, addr, data):
+#     os.chdir(addr)
+#     fd = open(filename, "wb")
+#     fd.write(data)
+#     fd.close()
+#
+#
+# def gen_filename(name, mtyp, addr, date, n):
+#     timepart = strftime("%d %b %y %H_%M_%S")
+#     file = email.Header.decode_header(name)[0][0]
+#     file = os.path.basename(file)
+#     print
+#     "Saved attachment  " + file + "  from  " + addr
+#     print
+#     "\n"
+#     path = os.path.join('.', file)
+#     pre, ext = os.path.splitext(file)
+#     pre = pre + "_" + timepart
+#     path = '%s%s' % (os.path.join('.', pre), ext)
+#     return path
+#
+#
 
 
-def process_date(data):
-    return data.date()  # todo split and show nicely
+def write_file(filename, addr, data):
+    os.chdir(addr)
+    fd = open(filename, "wb")
+    fd.write(data)
+    fd.close()
 
+
+def gen_filename(name, mtyp, addr, date, n):
+    timepart = strftime("%d %b %y %H_%M_%S")
+    file = email.Header.decode_header(name)[0][0]
+    file = os.path.basename(file)
+    print("Saved attachment  " + file + "  from  " + addr)
+
+    path = os.path.join(AttachDir, file)
+    pre, ext = os.path.splitext(file)
+    pre = pre + "_" + timepart
+    path = '%s%s' % (os.path.join(AttachDir, pre), ext)
+    return path
+
+#
+# def walk_parts(msg, addr, date, count, msgnum):
+#     for part in msg.walk():
+#         if part.is_multipart():
+#             continue
+#         dtypes = part.get_params(None, 'Content-Disposition')
+#         if not dtypes:
+#             if part.get_content_type() == 'text/plain':
+#                 continue
+#             ctypes = part.get_params()
+#             if not ctypes:
+#                 continue
+#             for key, val in ctypes:
+#                 if key.lower() == 'name':
+#                     filename = gen_filename(val, part.get_content_type(), addr, date, count)
+#                     break
+#             else:
+#                 continue
+#         else:
+#             attachment, filename = None, None
+#             for key, val in dtypes:
+#                 key = key.lower()
+#                 if key == 'filename':
+#                     filename = val
+#                 if key == 'attachment':
+#                     attachment = 1
+#             if not attachment:
+#                 continue
+#             filename = gen_filename(filename, part.get_content_type(), addr, date, count)
+#
+#         try:
+#             data = part.get_payload(decode=1)
+#         except:
+#             typ, val = sys.exc_info()[:2]
+#             warn("Message %s attachment decode error: %s for %s ``%s''"
+#                  % (msgnum, str(val), part.get_content_type(), filename))
+#             continue
+#
+#         if not data:
+#             warn("Could not decode attachment %s for %s"
+#                  % (part.get_content_type(), filename))
+#             continue
+#
+#         if type(data) is type(msg):
+#             count = walk_parts(data, addr, date, count, msgnum)
+#             continue
+#
+#         if SaveAttachments:
+#             exists = "0"
+#             try:
+#                 curdir = os.getcwd()
+#                 list = os.listdir('.\\')
+#                 for name in list:
+#                     if name == addr:
+#                         exists = "1"
+#                         break
+#                 if exists == "1":
+#                     write_file(filename, addr, data)
+#                     os.chdir(curdir)
+#                 else:
+#                     os.mkdir(addr)
+#                     write_file(filename, addr, data)
+#                     os.chdir(curdir)
+#                     exists == "0"
+#                     os.chdir(curdir)
+#             except IOError, val:
+#                 error('Could not create "%s": %s' % (filename, str(val)))
+#
+#         count += 1
+#
+#     return count
 
 class ActionControllerSearch(npyscreen.ActionControllerSimple):
     def create(self):
         self.add_action('^.*', self.set_search, False)  # ^ = beginning
 
     def set_search(self, command_line, widget_proxy, live):
-        # print(command_line)
-        # self.parent.value.set_filter(command_line[1:])
-        # self.parent.wMain.values = self.parent.value.get()
-        # self.parent.wMain.display()
 
         self.parent.wCommand.value = ''
         ids = process_command(command_line)
@@ -367,7 +562,7 @@ class ActionControllerSearch(npyscreen.ActionControllerSimple):
 
         self.parent.wMain.values = []
         for k, v in mails.items():
-            row = [v[b'ENVELOPE'].date,
+            row = [v[b'ENVELOPE'],
                    process_from(v[b'ENVELOPE'].from_[0]),
                    process_subject(v[b'ENVELOPE'].subject),
                    process_body(k, v[b'BODY']),

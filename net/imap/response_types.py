@@ -102,12 +102,15 @@ class BodyData(tuple):
     Returned when parsing BODY and BODYSTRUCTURE responses.
     """
 
+    raw = None
+
     @classmethod
-    def create(cls, response):
+    def create(cls, response, raw=None):
         # In case of multipart messages we will see at least 2 tuples
         # at the start. Nest these in to a list so that the returned
         # response tuple always has a consistent number of elements
         # regardless of whether the message is multipart or not.
+        cls.raw = raw
         if isinstance(response[0], tuple):
             # Multipart, find where the message part tuples stop
             for i, part in enumerate(response):
