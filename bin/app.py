@@ -216,30 +216,30 @@ print(server.search(['KEYWORD', 'test']))
 
 server.remove_flags([1], ['test'])
 print(server.search(['KEYWORD', 'test']))
-
-y = server.fetch([140,141], data=['ENVELOPE', 'BODY', 'HEADER', 'FLAGS', 'RFC822.SIZE'])
-y = server.fetch([140,141], data=['BODY.PEEK[TEXT]', 'FLAGS', 'RFC822.SIZE'])
-body = ''
-mail = email.message_from_bytes(y[140][b'BODY[TEXT]'])
-for part in mail.walk():
-    c_type = part.get_content_type()
-    c_disp = part.get('Content-Disposition')
-
-    if c_type == 'text/plain' and c_disp == None:
-        body = body + '\n' + part.get_payload()
-    else:
-        continue
-
-m140 = server.fetch([140], data=['ENVELOPE', 'BODY', 'FLAGS', 'RFC822.SIZE'])
-
-x = server.fetch([141], data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>'])
-server.fetch([140], data=['BODY[1]'])[140]
-
-
-base64.b64decode(server.fetch([140], data=['BODY[1]'])[140][b'BODY[1]'])
-b'Sehr geehrter Herr Dr. Christian Wengert!\n\nVielen Dank f\xc3\xbcr Ihre sofortige Antwort und eine detaillierte Beschreibung des T\xc3\xa4tigkeitsfeldes vom Unternehmen.\nDie weiteren Informationen \xc3\xbcber die Stelle und Ihr Unternehmen haben mein Interesse noch verst\xc3\xa4rkt und ich bin deshalb noch st\xc3\xa4rker an dem Stellenangebot interessiert.\n\nMit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,\n\nAron Birsa.\n\n-------- Original Message --------\nSubject: Re: Python Anwendungsprogrammierer\nLocal Time: April 21, 2017 10:47 AM\nUTC Time: April 21, 2017 8:47 AM\nFrom: christian@codefour.ch\nTo: Aron Birsa <aron@birsa.ch>\njobs-rav@codefour.ch <jobs-rav@codefour.ch>\n\nGuten Tag Aron\n\nVielen Dank f\xc3\xbcr Dein Mail.\n\ncodefour ist aus einer anderen Firma (Smart Power Pool) hervorgegangen. In dieser Firma haben wir Studien und Simulationen f\xc3\xbcr Energieversorger gemacht (vorwiegend mit Numpy und Scipy).\n\nDaraus hat sich ein gr\xc3\xb6\xc3\x9feres Software-Projekt ergeben, welches nun in der reinen Software-Firma codefour weitergef\xc3\xbchrt wird: Der Auftrag ist die Entwicklung eines Asset Management Systems. Die Idee hinter einem Asset Management System ist, Infrastruktur (Strom, Eisenbahn, Wasser, etc) von A-Z zu verwalten. Dazu geh\xc3\xb6rt einerseits, dass man regelm\xc3\xa4\xc3\x9fige Inspektionen per Tablet durchfuehren kann (im Feld: Was ist der Kurzschlussstrom der Mittelspannungsanlage) aber auch die gewonnenen Daten sinnvoll analysieren und auswerten kann, damit zuk\xc3\xbcnftige Investition- und Ersatzentscheide optimal gef\xc3\xa4llt werden k\xc3\xb6nnen (im B\xc3\xbcro: Welche Trafos riskieren bald einen Ausfall).\n\nDas Projekt war urspr\xc3\xbcnglich ein Nebenprojekt, hat sich aber zu einem wichtigen Projekt entwickelt. Die Stromfirma mit der ich das begonnen hat, sucht nach neuen M\xc3\xa4rkten und hat sich entschieden, dieses Projekt nun in den Markt zu pushen (nicht nur Strom, sondern jedwede groessere Infrastruktur).\n\nDas gibt nun ziemlich viel Arbeit und daher suche ich Verst\xc3\xa4rkung! Ich denke, dass der spannende Teil erst jetzt beginnt.\n- Wie kann man Voraussagen f\xc3\xbcr die Zukunft treffen?\n- Was sind gute Investitionsentscheide?\n- Sollen wir die Blockchain einf\xc3\xbchren, damit die Daten wirklich unver\xc3\xa4nderbar sind und immer nachvollziehbar ist, was wann gemacht wurde (das ist aus gesetzlichen Gr\xc3\xbcnden: Sollte mal ein Unfall passieren kann man beweisen, dass man das ordnungsgem\xc3\xa4\xc3\x9f gewartet hat und wer)\n- Verbindung von mehr Daten und anderen Systemen\n\nF\xc3\xbcr den bisherigen Erfolg war sehr wichtig, dass wir auch mal mitgehen zun einer Inspektion und uns so eine Schalttafel, Trafostration, Turbine auch mal ansehen und wirklich verstehen wo der Schuh dr\xc3\xbcckt.\n\nDie Arbeit beinhaltet:\n- Entwicklung von Python (90%)\n- Weiterentwicklung der bestehenden App\n- Implementation neuer Funktionen\n- Tests\n- Entwicklung am Frontend (JS/CSS, wobei wir versuchen m\xc3\xb6glichst wenig JS zu machen)\n\nKlingt das interessant f\xc3\xbcr Dich?\n\nBeste Gruesse\n\nChristian\n\nOn 20 Apr 2017, at 08:13, Aron Birsa <aron@birsa.ch> wrote:\n\nSehr geehrter Herr dr. Christian Wengert!\n\nIch sah Ihre Stellenanzeige f\xc3\xbcr die ausgeschriebene Position als Python Programmierer auf der Internetseite http://ec.europa.eu/ und war sofort begeistert.\nDas T\xc3\xa4tigkeitsfeld des Unternehmens Codefour finde ich sehr interessant.\nMein LinkedIn Profil finden Sie unter dieser Internetadresse https://www.linkedin.com/in/aron-birsa-15b75629/.\nFalls ich Ihren Vorstellungen entspreche, w\xc3\xbcrde Ich mich sehr freuen, wenn Sie mir zus\xc3\xa4tzliche Informationen zur Verf\xc3\xbcgung stellen k\xc3\xb6nnten.\n\nMit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,\n\nAron Birsa.\n\n<stellenanzeige.png>'
-base64.b64decode(server.fetch([140], data=['BODY[2]'])[140][b'BODY[2]'])
-b'<div>Sehr geehrter Herr Dr. Christian Wengert!<br></div><div><br></div><div>Vielen Dank f\xc3\xbcr Ihre sofortige Antwort und eine detaillierte Beschreibung des T\xc3\xa4tigkeitsfeldes vom Unternehmen.<br></div><div>Die weiteren Informationen \xc3\xbcber die Stelle und Ihr Unternehmen haben mein Interesse noch verst\xc3\xa4rkt und ich bin deshalb noch st\xc3\xa4rker an dem Stellenangebot interessiert.<br></div><div><br></div><div>Mit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,<br></div><div><br></div><div>Aron Birsa.<br></div><div class="protonmail_signature_block protonmail_signature_block-empty"><div class="protonmail_signature_block-user protonmail_signature_block-empty"><div><br></div></div><div class="protonmail_signature_block-proton protonmail_signature_block-empty"><br></div></div><div><br></div><blockquote class="protonmail_quote" type="cite"><div>-------- Original Message --------<br></div><div>Subject: Re: Python Anwendungsprogrammierer<br></div><div>Local Time: April 21, 2017 10:47 AM<br></div><div>UTC Time: April 21, 2017 8:47 AM<br></div><div>From: christian@codefour.ch<br></div><div>To: Aron Birsa &lt;aron@birsa.ch&gt;<br></div><div>jobs-rav@codefour.ch &lt;jobs-rav@codefour.ch&gt;<br></div><div><br></div><div>Guten Tag Aron<br></div><div class=""><br></div><div class="">Vielen Dank f\xc3\xbcr Dein Mail.&nbsp;<br></div><div class=""><br></div><div class="">codefour ist aus einer anderen Firma (Smart Power Pool) hervorgegangen. In dieser Firma haben wir Studien und Simulationen f\xc3\xbcr Energieversorger gemacht (vorwiegend mit Numpy und Scipy).&nbsp;<br></div><div class=""><div>Daraus hat sich ein gr\xc3\xb6\xc3\x9feres Software-Projekt ergeben, welches nun in der reinen Software-Firma codefour weitergef\xc3\xbchrt wird:&nbsp;Der Auftrag ist die Entwicklung eines Asset Management Systems. Die Idee hinter einem Asset Management System ist, Infrastruktur (Strom, Eisenbahn, Wasser, etc) von A-Z zu verwalten. Dazu geh\xc3\xb6rt &nbsp;einerseits, dass man regelm\xc3\xa4\xc3\x9fige Inspektionen per Tablet durchfuehren kann (im Feld: Was ist der Kurzschlussstrom der Mittelspannungsanlage) aber auch die gewonnenen Daten sinnvoll analysieren und auswerten kann, damit zuk\xc3\xbcnftige Investition- und Ersatzentscheide optimal gef\xc3\xa4llt werden k\xc3\xb6nnen (im B\xc3\xbcro: Welche Trafos riskieren bald einen Ausfall).<br></div><div><br></div><div>Das Projekt war urspr\xc3\xbcnglich ein Nebenprojekt, hat sich aber zu einem wichtigen Projekt entwickelt. Die Stromfirma mit der ich das begonnen hat, sucht nach neuen M\xc3\xa4rkten und hat sich entschieden, dieses Projekt nun in den Markt zu pushen (nicht nur Strom, sondern jedwede groessere Infrastruktur).<br></div><div><br></div><div>Das gibt nun ziemlich viel Arbeit und daher suche ich Verst\xc3\xa4rkung! Ich denke, dass der spannende Teil erst jetzt beginnt.&nbsp;<br></div></div><div class="">- Wie kann man Voraussagen f\xc3\xbcr die Zukunft treffen?&nbsp;<br></div><div class="">- Was sind gute Investitionsentscheide?&nbsp;<br></div><div class="">- Sollen wir die Blockchain einf\xc3\xbchren, damit die Daten wirklich unver\xc3\xa4nderbar sind und immer nachvollziehbar ist, was wann gemacht wurde (das ist aus gesetzlichen Gr\xc3\xbcnden: Sollte mal ein Unfall passieren kann man beweisen, dass man das ordnungsgem\xc3\xa4\xc3\x9f gewartet hat und wer)<br></div><div class="">- Verbindung von mehr Daten und anderen Systemen<br></div><div class=""><br></div><div class=""><div><br></div><div>F\xc3\xbcr den bisherigen Erfolg war sehr wichtig, dass wir auch mal mitgehen zun einer Inspektion und uns so eine Schalttafel, Trafostration, Turbine auch mal ansehen und wirklich verstehen wo der Schuh dr\xc3\xbcckt.<br></div></div><div class=""><br></div><div class=""><br></div><div class="">Die Arbeit beinhaltet:&nbsp;<br></div><div class="">- Entwicklung von Python (90%)<br></div><div class="">&nbsp; - Weiterentwicklung der bestehenden App<br></div><div class="">&nbsp; - Implementation neuer Funktionen&nbsp;<br></div><div class="">&nbsp; - Tests<br></div><div class="">- Entwicklung am Frontend (JS/CSS, wobei wir versuchen m\xc3\xb6glichst wenig JS zu machen)<br></div><div class=""><div><br></div><div><br></div><div>Klingt das interessant f\xc3\xbcr Dich?&nbsp;<br></div></div><div class=""><br></div><div class=""><br></div><div class="">Beste Gruesse<br></div><div class=""><br></div><div class="">Christian<br></div><div class=""><br></div><div class=""><br></div><div class=""><div><br></div><div><blockquote class="" type="cite"><div class="">On 20 Apr 2017, at 08:13, Aron Birsa &lt;<a class="" href="mailto:aron@birsa.ch" rel="noreferrer nofollow noopener">aron@birsa.ch</a>&gt; wrote:<br></div><div><br></div><div class=""><div class="">Sehr geehrter Herr dr. Christian Wengert!<br></div><div class=""><br></div><div class="">Ich sah Ihre Stellenanzeige f\xc3\xbcr die ausgeschriebene Position als Python Programmierer auf der Internetseite <a class="" href="http://ec.europa.eu/" rel="noreferrer nofollow noopener">http://ec.europa.eu/</a> und war sofort begeistert.<br></div><div class="">Das T\xc3\xa4tigkeitsfeld des Unternehmens Codefour finde ich sehr interessant.<br></div><div class="">Mein LinkedIn Profil finden Sie unter dieser Internetadresse <a class="" href="https://www.linkedin.com/in/aron-birsa-15b75629/" rel="noreferrer nofollow noopener">https://www.linkedin.com/in/aron-birsa-15b75629/</a>.<br></div><div class="">Falls ich Ihren Vorstellungen entspreche, w\xc3\xbcrde Ich mich sehr freuen, wenn Sie mir zus\xc3\xa4tzliche Informationen zur Verf\xc3\xbcgung stellen k\xc3\xb6nnten.<br></div><div class=""><br></div><div class="">Mit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,<br></div><div class=""><br></div><div class="">Aron Birsa.<br></div><div class="protonmail_signature_block protonmail_signature_block-empty"><div class="protonmail_signature_block-user protonmail_signature_block-empty"><div class=""><br></div></div><div class="protonmail_signature_block-proton protonmail_signature_block-empty"><br></div></div><div class=""><br></div><div><span>&lt;stellenanzeige.png&gt;</span><br></div></div></blockquote></div></div></blockquote><div><br></div>'
+#
+# y = server.fetch([140,141], data=['ENVELOPE', 'BODY', 'HEADER', 'FLAGS', 'RFC822.SIZE'])
+# y = server.fetch([140,141], data=['BODY.PEEK[TEXT]', 'FLAGS', 'RFC822.SIZE'])
+# body = ''
+# mail = email.message_from_bytes(y[140][b'BODY[TEXT]'])
+# for part in mail.walk():
+#     c_type = part.get_content_type()
+#     c_disp = part.get('Content-Disposition')
+#
+#     if c_type == 'text/plain' and c_disp == None:
+#         body = body + '\n' + part.get_payload()
+#     else:
+#         continue
+#
+# m140 = server.fetch([140], data=['ENVELOPE', 'BODY', 'FLAGS', 'RFC822.SIZE'])
+#
+# x = server.fetch([141], data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>'])
+# server.fetch([140], data=['BODY[1]'])[140]
+#
+#
+# base64.b64decode(server.fetch([140], data=['BODY[1]'])[140][b'BODY[1]'])
+# b'Sehr geehrter Herr Dr. Christian Wengert!\n\nVielen Dank f\xc3\xbcr Ihre sofortige Antwort und eine detaillierte Beschreibung des T\xc3\xa4tigkeitsfeldes vom Unternehmen.\nDie weiteren Informationen \xc3\xbcber die Stelle und Ihr Unternehmen haben mein Interesse noch verst\xc3\xa4rkt und ich bin deshalb noch st\xc3\xa4rker an dem Stellenangebot interessiert.\n\nMit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,\n\nAron Birsa.\n\n-------- Original Message --------\nSubject: Re: Python Anwendungsprogrammierer\nLocal Time: April 21, 2017 10:47 AM\nUTC Time: April 21, 2017 8:47 AM\nFrom: christian@codefour.ch\nTo: Aron Birsa <aron@birsa.ch>\njobs-rav@codefour.ch <jobs-rav@codefour.ch>\n\nGuten Tag Aron\n\nVielen Dank f\xc3\xbcr Dein Mail.\n\ncodefour ist aus einer anderen Firma (Smart Power Pool) hervorgegangen. In dieser Firma haben wir Studien und Simulationen f\xc3\xbcr Energieversorger gemacht (vorwiegend mit Numpy und Scipy).\n\nDaraus hat sich ein gr\xc3\xb6\xc3\x9feres Software-Projekt ergeben, welches nun in der reinen Software-Firma codefour weitergef\xc3\xbchrt wird: Der Auftrag ist die Entwicklung eines Asset Management Systems. Die Idee hinter einem Asset Management System ist, Infrastruktur (Strom, Eisenbahn, Wasser, etc) von A-Z zu verwalten. Dazu geh\xc3\xb6rt einerseits, dass man regelm\xc3\xa4\xc3\x9fige Inspektionen per Tablet durchfuehren kann (im Feld: Was ist der Kurzschlussstrom der Mittelspannungsanlage) aber auch die gewonnenen Daten sinnvoll analysieren und auswerten kann, damit zuk\xc3\xbcnftige Investition- und Ersatzentscheide optimal gef\xc3\xa4llt werden k\xc3\xb6nnen (im B\xc3\xbcro: Welche Trafos riskieren bald einen Ausfall).\n\nDas Projekt war urspr\xc3\xbcnglich ein Nebenprojekt, hat sich aber zu einem wichtigen Projekt entwickelt. Die Stromfirma mit der ich das begonnen hat, sucht nach neuen M\xc3\xa4rkten und hat sich entschieden, dieses Projekt nun in den Markt zu pushen (nicht nur Strom, sondern jedwede groessere Infrastruktur).\n\nDas gibt nun ziemlich viel Arbeit und daher suche ich Verst\xc3\xa4rkung! Ich denke, dass der spannende Teil erst jetzt beginnt.\n- Wie kann man Voraussagen f\xc3\xbcr die Zukunft treffen?\n- Was sind gute Investitionsentscheide?\n- Sollen wir die Blockchain einf\xc3\xbchren, damit die Daten wirklich unver\xc3\xa4nderbar sind und immer nachvollziehbar ist, was wann gemacht wurde (das ist aus gesetzlichen Gr\xc3\xbcnden: Sollte mal ein Unfall passieren kann man beweisen, dass man das ordnungsgem\xc3\xa4\xc3\x9f gewartet hat und wer)\n- Verbindung von mehr Daten und anderen Systemen\n\nF\xc3\xbcr den bisherigen Erfolg war sehr wichtig, dass wir auch mal mitgehen zun einer Inspektion und uns so eine Schalttafel, Trafostration, Turbine auch mal ansehen und wirklich verstehen wo der Schuh dr\xc3\xbcckt.\n\nDie Arbeit beinhaltet:\n- Entwicklung von Python (90%)\n- Weiterentwicklung der bestehenden App\n- Implementation neuer Funktionen\n- Tests\n- Entwicklung am Frontend (JS/CSS, wobei wir versuchen m\xc3\xb6glichst wenig JS zu machen)\n\nKlingt das interessant f\xc3\xbcr Dich?\n\nBeste Gruesse\n\nChristian\n\nOn 20 Apr 2017, at 08:13, Aron Birsa <aron@birsa.ch> wrote:\n\nSehr geehrter Herr dr. Christian Wengert!\n\nIch sah Ihre Stellenanzeige f\xc3\xbcr die ausgeschriebene Position als Python Programmierer auf der Internetseite http://ec.europa.eu/ und war sofort begeistert.\nDas T\xc3\xa4tigkeitsfeld des Unternehmens Codefour finde ich sehr interessant.\nMein LinkedIn Profil finden Sie unter dieser Internetadresse https://www.linkedin.com/in/aron-birsa-15b75629/.\nFalls ich Ihren Vorstellungen entspreche, w\xc3\xbcrde Ich mich sehr freuen, wenn Sie mir zus\xc3\xa4tzliche Informationen zur Verf\xc3\xbcgung stellen k\xc3\xb6nnten.\n\nMit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,\n\nAron Birsa.\n\n<stellenanzeige.png>'
+# base64.b64decode(server.fetch([140], data=['BODY[2]'])[140][b'BODY[2]'])
+# b'<div>Sehr geehrter Herr Dr. Christian Wengert!<br></div><div><br></div><div>Vielen Dank f\xc3\xbcr Ihre sofortige Antwort und eine detaillierte Beschreibung des T\xc3\xa4tigkeitsfeldes vom Unternehmen.<br></div><div>Die weiteren Informationen \xc3\xbcber die Stelle und Ihr Unternehmen haben mein Interesse noch verst\xc3\xa4rkt und ich bin deshalb noch st\xc3\xa4rker an dem Stellenangebot interessiert.<br></div><div><br></div><div>Mit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,<br></div><div><br></div><div>Aron Birsa.<br></div><div class="protonmail_signature_block protonmail_signature_block-empty"><div class="protonmail_signature_block-user protonmail_signature_block-empty"><div><br></div></div><div class="protonmail_signature_block-proton protonmail_signature_block-empty"><br></div></div><div><br></div><blockquote class="protonmail_quote" type="cite"><div>-------- Original Message --------<br></div><div>Subject: Re: Python Anwendungsprogrammierer<br></div><div>Local Time: April 21, 2017 10:47 AM<br></div><div>UTC Time: April 21, 2017 8:47 AM<br></div><div>From: christian@codefour.ch<br></div><div>To: Aron Birsa &lt;aron@birsa.ch&gt;<br></div><div>jobs-rav@codefour.ch &lt;jobs-rav@codefour.ch&gt;<br></div><div><br></div><div>Guten Tag Aron<br></div><div class=""><br></div><div class="">Vielen Dank f\xc3\xbcr Dein Mail.&nbsp;<br></div><div class=""><br></div><div class="">codefour ist aus einer anderen Firma (Smart Power Pool) hervorgegangen. In dieser Firma haben wir Studien und Simulationen f\xc3\xbcr Energieversorger gemacht (vorwiegend mit Numpy und Scipy).&nbsp;<br></div><div class=""><div>Daraus hat sich ein gr\xc3\xb6\xc3\x9feres Software-Projekt ergeben, welches nun in der reinen Software-Firma codefour weitergef\xc3\xbchrt wird:&nbsp;Der Auftrag ist die Entwicklung eines Asset Management Systems. Die Idee hinter einem Asset Management System ist, Infrastruktur (Strom, Eisenbahn, Wasser, etc) von A-Z zu verwalten. Dazu geh\xc3\xb6rt &nbsp;einerseits, dass man regelm\xc3\xa4\xc3\x9fige Inspektionen per Tablet durchfuehren kann (im Feld: Was ist der Kurzschlussstrom der Mittelspannungsanlage) aber auch die gewonnenen Daten sinnvoll analysieren und auswerten kann, damit zuk\xc3\xbcnftige Investition- und Ersatzentscheide optimal gef\xc3\xa4llt werden k\xc3\xb6nnen (im B\xc3\xbcro: Welche Trafos riskieren bald einen Ausfall).<br></div><div><br></div><div>Das Projekt war urspr\xc3\xbcnglich ein Nebenprojekt, hat sich aber zu einem wichtigen Projekt entwickelt. Die Stromfirma mit der ich das begonnen hat, sucht nach neuen M\xc3\xa4rkten und hat sich entschieden, dieses Projekt nun in den Markt zu pushen (nicht nur Strom, sondern jedwede groessere Infrastruktur).<br></div><div><br></div><div>Das gibt nun ziemlich viel Arbeit und daher suche ich Verst\xc3\xa4rkung! Ich denke, dass der spannende Teil erst jetzt beginnt.&nbsp;<br></div></div><div class="">- Wie kann man Voraussagen f\xc3\xbcr die Zukunft treffen?&nbsp;<br></div><div class="">- Was sind gute Investitionsentscheide?&nbsp;<br></div><div class="">- Sollen wir die Blockchain einf\xc3\xbchren, damit die Daten wirklich unver\xc3\xa4nderbar sind und immer nachvollziehbar ist, was wann gemacht wurde (das ist aus gesetzlichen Gr\xc3\xbcnden: Sollte mal ein Unfall passieren kann man beweisen, dass man das ordnungsgem\xc3\xa4\xc3\x9f gewartet hat und wer)<br></div><div class="">- Verbindung von mehr Daten und anderen Systemen<br></div><div class=""><br></div><div class=""><div><br></div><div>F\xc3\xbcr den bisherigen Erfolg war sehr wichtig, dass wir auch mal mitgehen zun einer Inspektion und uns so eine Schalttafel, Trafostration, Turbine auch mal ansehen und wirklich verstehen wo der Schuh dr\xc3\xbcckt.<br></div></div><div class=""><br></div><div class=""><br></div><div class="">Die Arbeit beinhaltet:&nbsp;<br></div><div class="">- Entwicklung von Python (90%)<br></div><div class="">&nbsp; - Weiterentwicklung der bestehenden App<br></div><div class="">&nbsp; - Implementation neuer Funktionen&nbsp;<br></div><div class="">&nbsp; - Tests<br></div><div class="">- Entwicklung am Frontend (JS/CSS, wobei wir versuchen m\xc3\xb6glichst wenig JS zu machen)<br></div><div class=""><div><br></div><div><br></div><div>Klingt das interessant f\xc3\xbcr Dich?&nbsp;<br></div></div><div class=""><br></div><div class=""><br></div><div class="">Beste Gruesse<br></div><div class=""><br></div><div class="">Christian<br></div><div class=""><br></div><div class=""><br></div><div class=""><div><br></div><div><blockquote class="" type="cite"><div class="">On 20 Apr 2017, at 08:13, Aron Birsa &lt;<a class="" href="mailto:aron@birsa.ch" rel="noreferrer nofollow noopener">aron@birsa.ch</a>&gt; wrote:<br></div><div><br></div><div class=""><div class="">Sehr geehrter Herr dr. Christian Wengert!<br></div><div class=""><br></div><div class="">Ich sah Ihre Stellenanzeige f\xc3\xbcr die ausgeschriebene Position als Python Programmierer auf der Internetseite <a class="" href="http://ec.europa.eu/" rel="noreferrer nofollow noopener">http://ec.europa.eu/</a> und war sofort begeistert.<br></div><div class="">Das T\xc3\xa4tigkeitsfeld des Unternehmens Codefour finde ich sehr interessant.<br></div><div class="">Mein LinkedIn Profil finden Sie unter dieser Internetadresse <a class="" href="https://www.linkedin.com/in/aron-birsa-15b75629/" rel="noreferrer nofollow noopener">https://www.linkedin.com/in/aron-birsa-15b75629/</a>.<br></div><div class="">Falls ich Ihren Vorstellungen entspreche, w\xc3\xbcrde Ich mich sehr freuen, wenn Sie mir zus\xc3\xa4tzliche Informationen zur Verf\xc3\xbcgung stellen k\xc3\xb6nnten.<br></div><div class=""><br></div><div class="">Mit bestem Dank und freundlichen Gr\xc3\xbc\xc3\x9fen,<br></div><div class=""><br></div><div class="">Aron Birsa.<br></div><div class="protonmail_signature_block protonmail_signature_block-empty"><div class="protonmail_signature_block-user protonmail_signature_block-empty"><div class=""><br></div></div><div class="protonmail_signature_block-proton protonmail_signature_block-empty"><br></div></div><div class=""><br></div><div><span>&lt;stellenanzeige.png&gt;</span><br></div></div></blockquote></div></div></blockquote><div><br></div>'
 
 
 # das hier mit attachment
@@ -290,29 +290,47 @@ def process_command(query):
             pass
 
     return mails
-
-
-def process_subject(data):
-    # return data.decode('utf8').replace('Subject: ', '').strip()
-    decoded = data.decode('utf8').strip()
-
-    sqe = decode_header(decoded)
-
-    return str(make_header(sqe)).replace('Subject: ', '')
+#
+#
+# def process_subject(data):
+#     # return data.decode('utf8').replace('Subject: ', '').strip()
+#     decoded = data.decode('utf8').strip()
+#
+#     sqe = decode_header(decoded)
+#
+#     return str(make_header(sqe)).replace('Subject: ', '')
 
 
 
 def process_from(data):
-    decoded = data.decode('utf8').strip()
+    name = data.name.decode('utf8') if data.name else ''
+    if name.startswith('='):
+        name = make_header(decode_header(name))
+    mailbox = data.mailbox.decode('utf8') if data.mailbox else ''
+    host = data.host.decode('utf8') if data.host else ''
 
-    sqe = decode_header(decoded)
-
-    return str(make_header(sqe)).replace('From: ', '').replace('"', '')
+    return f'{name} <{mailbox}@{host}>'
     # return data.decode('utf8').replace('From: ', '').strip()
 
 
-def process_body(data):
-    return data.decode('utf8').strip()
+
+def process_subject(data):
+
+    name = make_header(decode_header(data.decode('utf8')))
+    return name
+    # return data.decode('utf8').replace('From: ', '').strip()
+
+
+def process_body(k, data):
+    content = ''
+    if data.is_multipart:
+
+        for part in data:
+            pass
+    else:
+        body_1 = server.fetch([k], data=['BODY[1]'])[k]
+
+    return content
 
 
 def process_size(data):
@@ -341,18 +359,17 @@ class ActionControllerSearch(npyscreen.ActionControllerSimple):
         self.parent.wCommand.value = ''
         ids = process_command(command_line)
         # todo has attachment?
-        mails = server.fetch(ids, data=['INTERNALDATE', 'BODY[HEADER.FIELDS (SUBJECT)]', 'BODY[HEADER.FIELDS (FROM)]',
-                                        'BODY.PEEK[TEXT] <0.1024>', 'FLAGS', 'RFC822.SIZE'])
+        mails = server.fetch(ids, data=['ENVELOPE', 'BODY', 'FLAGS', 'RFC822.SIZE'])
 
         # data = []
         # [data.append([k, b'BODY[HEADER.FIELDS (SUBJECT FROM)]', b'BODY[1][0]', 'FLAGS', 'RFC822.SIZE']) for k,v in mails.items()]
 
         self.parent.wMain.values = []
         for k, v in mails.items():
-            row = [process_date(v[b'INTERNALDATE']),
-                   process_subject(v[b'BODY[HEADER.FIELDS ("SUBJECT")]']),
-                   process_from(v[b'BODY[HEADER.FIELDS ("FROM")]']),
-                   process_body(v[b'BODY[TEXT]<0>']),
+            row = [v[b'ENVELOPE'].date,
+                   process_from(v[b'ENVELOPE'].from_[0]),
+                   process_subject(v[b'ENVELOPE'].subject),
+                   process_body(k, v[b'BODY']),
                    process_flags(v[b'FLAGS']),
                    process_size(v[b'RFC822.SIZE'])]
 
