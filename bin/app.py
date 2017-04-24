@@ -1,15 +1,7 @@
 # coding=utf-8
 import argparse
 import datetime
-from collections import defaultdict
-import sys
 import toolz
-from asciimatics.event import KeyboardEvent
-from asciimatics.exceptions import StopApplication, ResizeScreenError
-from asciimatics.scene import Scene
-from asciimatics.screen import Screen
-from asciimatics.widgets import Frame, Layout, TextBox, MultiColumnListBox, Widget, Label, Text
-from npyscreen import Form, TitleText
 
 from net.imap.imapclient import IMAPClient
 
@@ -373,30 +365,169 @@ def main():
 
 import npyscreen
 
+#
+# class MyFormMutt(npyscreen.FormMutt):
+#
+#     MAIN_WIDGET_CLASS = npyscreen.SimpleGrid
+#     # MAIN_WIDGET_CLASS = editmultiline.MultiLineEdit
+#     # def __init__(self, cycle_widgets=True, *args, **keywords):
+#     #     super(FormMutt, self).__init__(cycle_widgets=cycle_widgets, *args, **keywords)
+#     #
+#     # def draw_form(self):
+#     #     MAXY, MAXX = self.lines, self.columns  # self.curses_pad.getmaxyx()
+#     #     self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX - 1)
+#     #     self.curses_pad.hline(MAXY - 2 - self.BLANK_LINES_BASE, 0, curses.ACS_HLINE, MAXX - 1)
+#     #
+#     # def create(self):
+#     #     MAXY, MAXX = self.lines, self.columns
+#     #
+#     #     self.wStatus1 = self.add(self.__class__.STATUS_WIDGET_CLASS, rely=0,
+#     #                              relx=self.__class__.STATUS_WIDGET_X_OFFSET,
+#     #                              editable=False,
+#     #                              )
+#     #
+#     #     if self.__class__.MAIN_WIDGET_CLASS:
+#     #         self.wMain = self.add(self.__class__.MAIN_WIDGET_CLASS,
+#     #                               rely=self.__class__.MAIN_WIDGET_CLASS_START_LINE,
+#     #                               relx=0, max_height=-2,
+#     #                               )
+#     #     self.wStatus2 = self.add(self.__class__.STATUS_WIDGET_CLASS, rely=MAXY - 2 - self.BLANK_LINES_BASE,
+#     #                              relx=self.__class__.STATUS_WIDGET_X_OFFSET,
+#     #                              editable=False,
+#     #                              )
+#     #
+#     #     if not self.__class__.COMMAND_WIDGET_BEGIN_ENTRY_AT:
+#     #         self.wCommand = self.add(self.__class__.COMMAND_WIDGET_CLASS, name=self.__class__.COMMAND_WIDGET_NAME,
+#     #                                  rely=MAXY - 1 - self.BLANK_LINES_BASE, relx=0, )
+#     #     else:
+#     #         self.wCommand = self.add(
+#     #             self.__class__.COMMAND_WIDGET_CLASS, name=self.__class__.COMMAND_WIDGET_NAME,
+#     #             rely=MAXY - 1 - self.BLANK_LINES_BASE, relx=0,
+#     #             begin_entry_at=self.__class__.COMMAND_WIDGET_BEGIN_ENTRY_AT,
+#     #             allow_override_begin_entry_at=self.__class__.COMMAND_ALLOW_OVERRIDE_BEGIN_ENTRY_AT
+#     #         )
+#     #
+#     #     self.wStatus1.important = True
+#     #     self.wStatus2.important = True
+#     #     self.nextrely = 2
+#     #
+#     # def h_display(self, input):
+#     #     super(FormMutt, self).h_display(input)
+#     #     if hasattr(self, 'wMain'):
+#     #         if not self.wMain.hidden:
+#     #             self.wMain.display()
+#     #
+#     # def resize(self):
+#     #     super(FormMutt, self).resize()
+#     #     MAXY, MAXX = self.lines, self.columns
+#     #     self.wStatus2.rely = MAXY - 2 - self.BLANK_LINES_BASE
+#     #     self.wCommand.rely = MAXY - 1 - self.BLANK_LINES_BASE
+
+
+# class ActionControllerSearch(npyscreen.ActionControllerSimple):
+#     def create(self):
+#         self.add_action('^/.*', self.set_search, True)
+#
+#     def set_search(self, command_line, widget_proxy, live):
+#         self.parent.value.set_filter(command_line[1:])
+#         self.parent.wMain.values = self.parent.value.get()
+#         self.parent.wMain.display()
+#
+#
+# class FmSearchActive(npyscreen.FormMuttActiveTraditional):
+#     ACTION_CONTROLLER = ActionControllerSearch
+# #
+# class TestApp(npyscreen.NPSApp):
+#     def main(self):
+#         # These lines create the form and populate it with widgets.
+#         # A fairly complex screen in only 8 or so lines of code - a line for each control.
+#         F = npyscreen.ActionFormWithMenus(name="Welcome to Npyscreen", )
+#         f = F.add(npyscreen.TitleFixedText, name="Fixed Text:", value="This is fixed text")
+#         t = F.add(npyscreen.TitleText, name="Text:", )
+#         p = F.add(npyscreen.TitlePassword, name="Password:")
+#         fn = F.add(npyscreen.TitleFilename, name="Filename:")
+#         dt = F.add(npyscreen.TitleDateCombo, name="Date:")
+#         cb = F.add(npyscreen.Checkbox, name="A Checkbox")
+#         s = F.add(npyscreen.TitleSlider, out_of=12, name="Slider")
+#         # ml = F.add(npyscreen.MultiLineEdit,
+#         #            value="""try typing here! Mutiline text, press ^R to reformat.\nPress ^X for automatically created list of menus""",
+#         #            max_height=5, rely=9)
+#         # ms = F.add(npyscreen.TitleSelectOne, max_height=4, value=[1, ], name="Pick One",
+#         #            values=["Option1", "Option2", "Option3"], scroll_exit=True, width=30)
+#         # ms2 = F.add(npyscreen.MultiSelect, max_height=4, value=[1, ],
+#         #             values=["Option1", "Option2", "Option3"], scroll_exit=True, width=20)
+#
+#         # bn = F.add(npyscreen.MiniButton, name="Button", )
+#
+#         # gd = F.add(npyscreen.SimpleGrid, relx = 1, rely=15, width=100, col_titles=['1', '2', '3', '4'])
+#         gd = F.add(npyscreen.GridColTitles, col_titles=['1', '2', '3', '4'])
+#         gd.values = []
+#         for x in range(36):
+#             row = []
+#             for y in range(x, x + 36):
+#                 row.append(y)
+#             gd.values.append(row)
+#
+#         # This lets the user play with the Form.
+#         F.edit()
 
 class ActionControllerSearch(npyscreen.ActionControllerSimple):
     def create(self):
-        self.add_action('^/.*', self.set_search, True)
+        self.add_action('^.*', self.set_search, True)
 
     def set_search(self, command_line, widget_proxy, live):
-        self.parent.value.set_filter(command_line[1:])
-        self.parent.wMain.values = self.parent.value.get()
-        self.parent.wMain.display()
+
+        #self.parent.value.set_filter(command_line[1:])
+        #self.parent.wMain.values = self.parent.value.get()
+        #self.parent.wMain.display()
+        self.parent.wStatus2.value = command_line
 
 
-class FmSearchActive(npyscreen.FormMuttActiveTraditional):
+class DataController(npyscreen.NPSFilteredDataBase):
+    def filter_data(self):
+        self.parent.wStatus2.value = self._filter
+        # if self._filter and self.get_all_values():
+        #     return [x for x in self.get_all_values() if self._filter in x]
+        # else:
+        #     return self.get_all_values()
+
+
+class FmSearchActive(npyscreen.FormMuttActive):
     ACTION_CONTROLLER = ActionControllerSearch
+    MAIN_WIDGET_CLASS = npyscreen.GridColTitles
+    MAIN_WIDGET_CLASS_START_LINE = 2
+    STATUS_WIDGET_CLASS = npyscreen.TextCommandBox
+    STATUS_WIDGET_X_OFFSET = 0
+    COMMAND_WIDGET_CLASS = npyscreen.Textfield
+    COMMAND_WIDGET_NAME = 'Search'
+    COMMAND_WIDGET_BEGIN_ENTRY_AT = None
+    COMMAND_ALLOW_OVERRIDE_BEGIN_ENTRY_AT = True
+
+    DATA_CONTROLER = DataController
+
 
 
 class TestApp(npyscreen.NPSApp):
     def main(self):
         F = FmSearchActive()
-        F.wStatus1.value = "Status Line "
-        F.wStatus2.value = "Second Status Line "
-        F.value.set_values([str(x) for x in range(500)])
-        F.wMain.values = F.value.get()
+        F.wStatus1.value = "mail "
+        F.wStatus2.value = "search / commands "
+
+        F.wMain.values = []
+        for x in range(36):
+            row = []
+            for y in range(4):
+                row.append(y)
+            F.wMain.values.append(row)
+
+        F.wMain.col_titles = ['1', '2', '3', '4']
 
         F.edit()
+
+
+if __name__ == "__main__":
+    App = TestApp()
+    App.run()
 
 if __name__ == "__main__":
     App = TestApp()
