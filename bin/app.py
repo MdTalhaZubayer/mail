@@ -301,175 +301,100 @@ def parse_command_line_args():
 #         # return 100
 
 
-def main():
-    args = parse_command_line_args()
-    print('Connecting...')
-    # client = create_client_from_config(args)
-    server = IMAPClient(args.host, use_uid=True, ssl=args.ssl)
-    server.login(args.username, args.password)
-    print('Connected.')
 
-    select_info = server.select_folder('INBOX')
-    print('%d messages in INBOX' % select_info[b'EXISTS'])
+args = parse_command_line_args()
+print('Connecting...')
+# client = create_client_from_config(args)
+server = IMAPClient(args.host, use_uid=True, ssl=args.ssl)
+server.login(args.username, args.password)
+print('Connected.')
 
-    messages = server.search([b'NOT', b'DELETED'])
-    print("%d messages that aren't deleted" % len(messages))
+select_info = server.select_folder('INBOX')
+print('%d messages in INBOX' % select_info[b'EXISTS'])
 
-    print(server.search(['KEYWORD', 'test']))
+messages = server.search([b'NOT', b'DELETED'])
+print("%d messages that aren't deleted" % len(messages))
 
-    server.add_flags([1], ['test'])
-    print(server.search(['KEYWORD', 'test']))
+print(server.search(['KEYWORD', 'test']))
 
-    server.remove_flags([1], ['test'])
-    print(server.search(['KEYWORD', 'test']))
+server.add_flags([1], ['test'])
+print(server.search(['KEYWORD', 'test']))
 
-    x = server.fetch([141], data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>'])
+server.remove_flags([1], ['test'])
+print(server.search(['KEYWORD', 'test']))
 
-    # das hier mit attachment
-    # http://stackoverflow.com/questions/6225763/downloading-multiple-attachments-using-imaplib
-    x = server.fetch([139], data=['BODYSTRUCTURE'])
-    f = x[139][b'BODYSTRUCTURE']
-    len(f[0])
+x = server.fetch([141], data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>'])
 
-    while True:
-        query = input('gimme')
-        if query == 'quit' or query == 'q':
-            break
-        if query == 'help':
-            print('help todo')
-            continue
-        terms = []
+# das hier mit attachment
+# http://stackoverflow.com/questions/6225763/downloading-multiple-attachments-using-imaplib
+x = server.fetch([139], data=['BODYSTRUCTURE'])
+f = x[139][b'BODYSTRUCTURE']
+len(f[0])
+#
+# while True:
+#     query = input('gimme')
+#     if query == 'quit' or query == 'q':
+#         break
+#     if query == 'help':
+#         print('help todo')
+#         continue
+#     terms = []
+#
+#     processed_query = [x.split(':') for x in query.split()]
+#
+#     grouped = toolz.groupby(lambda x: x[0], processed_query)
+#
+#     for group, items in grouped.items():
+#         if len(items) > 1:
+#             terms.append('OR')
+#
+#         for field, term in items:
+#             field = field.upper()
+#             if field.startswith('-'):
+#                 field = field[1:]
+#                 terms.append('NOT')
+#             convert = IMAP_SEARCH_FIELDS.get(field, None)
+#             if field in IMAP_SEARCH_FIELDS:
+#                 terms.append(field)
+#             if term and convert:
+#                 terms.append(convert(term))
+#
+#     print(terms)
+#     print(server.search(terms))
 
-        processed_query = [x.split(':') for x in query.split()]
 
-        grouped = toolz.groupby(lambda x: x[0], processed_query)
+def process_command(query):
 
-        for group, items in grouped.items():
-            if len(items) > 1:
-                terms.append('OR')
+    if query == 'quit' or query == 'q':
+        pass
+    if query == 'help':
+        pass
 
-            for field, term in items:
-                field = field.upper()
-                if field.startswith('-'):
-                    field = field[1:]
-                    terms.append('NOT')
-                convert = IMAP_SEARCH_FIELDS.get(field, None)
-                if field in IMAP_SEARCH_FIELDS:
-                    terms.append(field)
-                if term and convert:
-                    terms.append(convert(term))
+    terms = []
 
-        print(terms)
-        print(server.search(terms))
+    processed_query = [x.split(':') for x in query.split()]
 
+    grouped = toolz.groupby(lambda x: x[0], processed_query)
+
+    for group, items in grouped.items():
+        if len(items) > 1:
+            terms.append('OR')
+
+        for field, term in items:
+            field = field.upper()
+            if field.startswith('-'):
+                field = field[1:]
+                terms.append('NOT')
+            convert = IMAP_SEARCH_FIELDS.get(field, None)
+            if field in IMAP_SEARCH_FIELDS:
+                terms.append(field)
+            if term and convert:
+                terms.append(convert(term))
+    mails = server.search(terms)
+    return mails
 
 import npyscreen
 
-#
-# class MyFormMutt(npyscreen.FormMutt):
-#
-#     MAIN_WIDGET_CLASS = npyscreen.SimpleGrid
-#     # MAIN_WIDGET_CLASS = editmultiline.MultiLineEdit
-#     # def __init__(self, cycle_widgets=True, *args, **keywords):
-#     #     super(FormMutt, self).__init__(cycle_widgets=cycle_widgets, *args, **keywords)
-#     #
-#     # def draw_form(self):
-#     #     MAXY, MAXX = self.lines, self.columns  # self.curses_pad.getmaxyx()
-#     #     self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX - 1)
-#     #     self.curses_pad.hline(MAXY - 2 - self.BLANK_LINES_BASE, 0, curses.ACS_HLINE, MAXX - 1)
-#     #
-#     # def create(self):
-#     #     MAXY, MAXX = self.lines, self.columns
-#     #
-#     #     self.wStatus1 = self.add(self.__class__.STATUS_WIDGET_CLASS, rely=0,
-#     #                              relx=self.__class__.STATUS_WIDGET_X_OFFSET,
-#     #                              editable=False,
-#     #                              )
-#     #
-#     #     if self.__class__.MAIN_WIDGET_CLASS:
-#     #         self.wMain = self.add(self.__class__.MAIN_WIDGET_CLASS,
-#     #                               rely=self.__class__.MAIN_WIDGET_CLASS_START_LINE,
-#     #                               relx=0, max_height=-2,
-#     #                               )
-#     #     self.wStatus2 = self.add(self.__class__.STATUS_WIDGET_CLASS, rely=MAXY - 2 - self.BLANK_LINES_BASE,
-#     #                              relx=self.__class__.STATUS_WIDGET_X_OFFSET,
-#     #                              editable=False,
-#     #                              )
-#     #
-#     #     if not self.__class__.COMMAND_WIDGET_BEGIN_ENTRY_AT:
-#     #         self.wCommand = self.add(self.__class__.COMMAND_WIDGET_CLASS, name=self.__class__.COMMAND_WIDGET_NAME,
-#     #                                  rely=MAXY - 1 - self.BLANK_LINES_BASE, relx=0, )
-#     #     else:
-#     #         self.wCommand = self.add(
-#     #             self.__class__.COMMAND_WIDGET_CLASS, name=self.__class__.COMMAND_WIDGET_NAME,
-#     #             rely=MAXY - 1 - self.BLANK_LINES_BASE, relx=0,
-#     #             begin_entry_at=self.__class__.COMMAND_WIDGET_BEGIN_ENTRY_AT,
-#     #             allow_override_begin_entry_at=self.__class__.COMMAND_ALLOW_OVERRIDE_BEGIN_ENTRY_AT
-#     #         )
-#     #
-#     #     self.wStatus1.important = True
-#     #     self.wStatus2.important = True
-#     #     self.nextrely = 2
-#     #
-#     # def h_display(self, input):
-#     #     super(FormMutt, self).h_display(input)
-#     #     if hasattr(self, 'wMain'):
-#     #         if not self.wMain.hidden:
-#     #             self.wMain.display()
-#     #
-#     # def resize(self):
-#     #     super(FormMutt, self).resize()
-#     #     MAXY, MAXX = self.lines, self.columns
-#     #     self.wStatus2.rely = MAXY - 2 - self.BLANK_LINES_BASE
-#     #     self.wCommand.rely = MAXY - 1 - self.BLANK_LINES_BASE
-
-
-# class ActionControllerSearch(npyscreen.ActionControllerSimple):
-#     def create(self):
-#         self.add_action('^/.*', self.set_search, True)
-#
-#     def set_search(self, command_line, widget_proxy, live):
-#         self.parent.value.set_filter(command_line[1:])
-#         self.parent.wMain.values = self.parent.value.get()
-#         self.parent.wMain.display()
-#
-#
-# class FmSearchActive(npyscreen.FormMuttActiveTraditional):
-#     ACTION_CONTROLLER = ActionControllerSearch
-# #
-# class TestApp(npyscreen.NPSApp):
-#     def main(self):
-#         # These lines create the form and populate it with widgets.
-#         # A fairly complex screen in only 8 or so lines of code - a line for each control.
-#         F = npyscreen.ActionFormWithMenus(name="Welcome to Npyscreen", )
-#         f = F.add(npyscreen.TitleFixedText, name="Fixed Text:", value="This is fixed text")
-#         t = F.add(npyscreen.TitleText, name="Text:", )
-#         p = F.add(npyscreen.TitlePassword, name="Password:")
-#         fn = F.add(npyscreen.TitleFilename, name="Filename:")
-#         dt = F.add(npyscreen.TitleDateCombo, name="Date:")
-#         cb = F.add(npyscreen.Checkbox, name="A Checkbox")
-#         s = F.add(npyscreen.TitleSlider, out_of=12, name="Slider")
-#         # ml = F.add(npyscreen.MultiLineEdit,
-#         #            value="""try typing here! Mutiline text, press ^R to reformat.\nPress ^X for automatically created list of menus""",
-#         #            max_height=5, rely=9)
-#         # ms = F.add(npyscreen.TitleSelectOne, max_height=4, value=[1, ], name="Pick One",
-#         #            values=["Option1", "Option2", "Option3"], scroll_exit=True, width=30)
-#         # ms2 = F.add(npyscreen.MultiSelect, max_height=4, value=[1, ],
-#         #             values=["Option1", "Option2", "Option3"], scroll_exit=True, width=20)
-#
-#         # bn = F.add(npyscreen.MiniButton, name="Button", )
-#
-#         # gd = F.add(npyscreen.SimpleGrid, relx = 1, rely=15, width=100, col_titles=['1', '2', '3', '4'])
-#         gd = F.add(npyscreen.GridColTitles, col_titles=['1', '2', '3', '4'])
-#         gd.values = []
-#         for x in range(36):
-#             row = []
-#             for y in range(x, x + 36):
-#                 row.append(y)
-#             gd.values.append(row)
-#
-#         # This lets the user play with the Form.
-#         F.edit()
 
 class ActionControllerSearch(npyscreen.ActionControllerSimple):
     def create(self):
@@ -482,7 +407,19 @@ class ActionControllerSearch(npyscreen.ActionControllerSimple):
         #self.parent.wMain.display()
 
         self.parent.wCommand.value = ''
+        ids = process_command(command_line)
 
+        mails = server.fetch(ids, data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>', 'FLAGS', 'RFC822.SIZE'])
+
+        # data = []
+        # [data.append([k, b'BODY[HEADER.FIELDS (SUBJECT FROM)]', b'BODY[1][0]', 'FLAGS', 'RFC822.SIZE']) for k,v in mails.items()]
+
+        self.parent.wMain.values = []
+        for k, v in mails.items():
+            row = [k, v[b'BODY[HEADER.FIELDS ("SUBJECT" "FROM")]'], v[b'BODY[1]<0>'], v[b'FLAGS'], v[b'RFC822.SIZE']]
+
+            self.parent.wMain.values.append(row)
+        (self)
 
 # class DataController(npyscreen.NPSFilteredDataBase):
 #     def filter_data(self):
@@ -524,13 +461,13 @@ class TestApp(npyscreen.NPSApp):
         F.wStatus2.value = "search / commands "
 
         F.wMain.values = []
-        for x in range(36):
-            row = []
-            for y in range(4):
-                row.append(y)
-            F.wMain.values.append(row)
+        # for x in range(36):
+        #     row = []
+        #     for y in range(4):
+        #         row.append(y)
+        #     F.wMain.values.append(row)
 
-        F.wMain.col_titles = ['1', '2', '3', '4']
+        F.wMain.col_titles = ['id', 'from', 'content', 'flags', 'size']
 
         F.edit()
 
