@@ -325,8 +325,9 @@ def process_body(k, data):
     content = ''
     if data.is_multipart:
 
-        for part in data:
-            pass
+        for part in data[0]:
+            # for typ, subtyp, charset_and_encoding, body_id, body_description, body_encoding, body_size, nmd5 in part:
+                pass
     else:
         body_1 = server.fetch([k], data=['BODY[1]'])[k]
 
