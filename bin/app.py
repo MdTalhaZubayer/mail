@@ -1,5 +1,6 @@
 # coding=utf-8
 import argparse
+import curses
 import datetime
 import toolz
 
@@ -396,38 +397,52 @@ def process_command(query):
 import npyscreen
 
 
+def process_subject(data):
+    return data.decode('utf8').replace('Subject: ', '').strip()
+def process_from(data):
+    return data.decode('utf8').replace('From: ', '').strip()
+
+
+def process_body(data):
+    return data.decode('utf8').strip()
+
+
+def process_size(data):
+    return int(data)
+
+
+def process_flags(data):
+    return data  # todo
+
 class ActionControllerSearch(npyscreen.ActionControllerSimple):
     def create(self):
         self.add_action('^.*', self.set_search, False)  # ^ = beginning
 
     def set_search(self, command_line, widget_proxy, live):
         # print(command_line)
-        #self.parent.value.set_filter(command_line[1:])
-        #self.parent.wMain.values = self.parent.value.get()
-        #self.parent.wMain.display()
+        # self.parent.value.set_filter(command_line[1:])
+        # self.parent.wMain.values = self.parent.value.get()
+        # self.parent.wMain.display()
 
         self.parent.wCommand.value = ''
         ids = process_command(command_line)
 
-        mails = server.fetch(ids, data=['BODY[HEADER.FIELDS (SUBJECT FROM)]', 'BODY.PEEK[1] <0.100>', 'FLAGS', 'RFC822.SIZE'])
+        mails = server.fetch(ids, data=['BODY[HEADER.FIELDS (SUBJECT)]', 'BODY[HEADER.FIELDS (FROM)]', 'BODY.PEEK[1] <0.100>', 'FLAGS', 'RFC822.SIZE'])
 
         # data = []
         # [data.append([k, b'BODY[HEADER.FIELDS (SUBJECT FROM)]', b'BODY[1][0]', 'FLAGS', 'RFC822.SIZE']) for k,v in mails.items()]
 
         self.parent.wMain.values = []
         for k, v in mails.items():
-            row = [k, v[b'BODY[HEADER.FIELDS ("SUBJECT" "FROM")]'], v[b'BODY[1]<0>'], v[b'FLAGS'], v[b'RFC822.SIZE']]
+            row = [k,
+                   process_subject(v[b'BODY[HEADER.FIELDS ("SUBJECT")]']),
+                   process_from(v[b'BODY[HEADER.FIELDS ("FROM")]']),
+                   process_body(v[b'BODY[1]<0>']),
+                   process_flags(v[b'FLAGS']),
+                   process_size(v[b'RFC822.SIZE'])]
 
             self.parent.wMain.values.append(row)
-        (self)
-
-# class DataController(npyscreen.NPSFilteredDataBase):
-#     def filter_data(self):
-#         self.parent.wStatus2.value = self._filter
-        # if self._filter and self.get_all_values():
-        #     return [x for x in self.get_all_values() if self._filter in x]
-        # else:
-        #     return self.get_all_values()
+        self.parent.wMain.update()
 
 
 class MyTextCommandBox(npyscreen.TextCommandBox):
@@ -438,10 +453,62 @@ class MyTextCommandBox(npyscreen.TextCommandBox):
                 *args, **kwargs):
         super(MyTextCommandBox, self).__init__(screen, history, history_max, set_up_history_keys, *args, **kwargs)
 
+def on_table_update(*args, **kwargs):
+    a = 3
+
+
+class MyGrid(npyscreen.GridColTitles):
+    def __init__(self, screen, col_titles=None, *args, **kwargs):
+
+        super(MyGrid, self).__init__(screen, col_titles, *args, **kwargs)
+        self.select_whole_line = True
+
+
+    def set_up_handlers(self):
+        super(MyGrid, self).set_up_handlers()
+        self.handlers = {
+            curses.ascii.NL: self.select,
+            curses.ascii.CR: self.select,
+            curses.KEY_UP: self.h_move_line_up,
+                    curses.KEY_LEFT:    self.h_move_cell_left,
+                    curses.KEY_DOWN:    self.h_move_line_down,
+                    curses.KEY_RIGHT:   self.h_move_cell_right,
+                    "k":                self.h_move_line_up,
+                    "h":                self.h_move_cell_left,
+                    "j":                self.h_move_line_down,
+                    "l":                self.h_move_cell_right,
+                    curses.KEY_NPAGE:   self.h_move_page_down,
+                    curses.KEY_PPAGE:   self.h_move_page_up,
+                    curses.KEY_HOME:    self.h_show_beginning,
+                    curses.KEY_END:     self.h_show_end,
+                    ord('g'):           self.h_show_beginning,
+                    ord('G'):           self.h_show_end,
+                    curses.ascii.TAB:   self.h_exit,
+
+                    curses.KEY_BTAB:     self.h_exit_up,
+                    '^P':               self.h_exit_up,
+                    '^N':               self.h_exit_down,
+                    #curses.ascii.NL:    self.h_exit,
+                    #curses.ascii.SP:    self.h_exit,
+                    #ord('x'):       self.h_exit,
+                    ord('q'):       self.h_exit,
+                    curses.ascii.ESC:   self.h_exit,
+                    curses.KEY_MOUSE:    self.h_exit_mouse,
+                }
+
+        self.complex_handlers = [
+                    ]
+    def select(self, *args, **kwargs):
+
+        a, b = self.edit_cell
+        mail_id = self.values[a][0]
+        # todo fetch message and siplay it on a separate screen
+        # todo can we do tabbed?
+
 
 class FmSearchActive(npyscreen.FormMuttActive):
     ACTION_CONTROLLER = ActionControllerSearch
-    MAIN_WIDGET_CLASS = npyscreen.GridColTitles
+    MAIN_WIDGET_CLASS = MyGrid
     MAIN_WIDGET_CLASS_START_LINE = 2
     STATUS_WIDGET_CLASS = npyscreen.Textfield
     STATUS_WIDGET_X_OFFSET = 0
@@ -451,6 +518,14 @@ class FmSearchActive(npyscreen.FormMuttActive):
     COMMAND_ALLOW_OVERRIDE_BEGIN_ENTRY_AT = True
 
     # DATA_CONTROLER = DataController
+    # new_handlers = {
+    #  curses.KEY_ENTER: on_table_update,
+    # }
+    MAIN_WIDGET_CLASS.select_whole_line = True
+
+    # a = MAIN_WIDGET_CLASS.event_handlers
+    bb  =3
+
 
 
 
@@ -467,7 +542,7 @@ class TestApp(npyscreen.NPSApp):
         #         row.append(y)
         #     F.wMain.values.append(row)
 
-        F.wMain.col_titles = ['id', 'from', 'content', 'flags', 'size']
+        F.wMain.col_titles = ['id', 'from', 'subject', 'content', 'flags', 'size']
 
         F.edit()
 
