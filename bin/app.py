@@ -473,37 +473,47 @@ import npyscreen
 
 class ActionControllerSearch(npyscreen.ActionControllerSimple):
     def create(self):
-        self.add_action('^.*', self.set_search, True)
+        self.add_action('^.*', self.set_search, False)  # ^ = beginning
 
     def set_search(self, command_line, widget_proxy, live):
-
+        # print(command_line)
         #self.parent.value.set_filter(command_line[1:])
         #self.parent.wMain.values = self.parent.value.get()
         #self.parent.wMain.display()
-        self.parent.wStatus2.value = command_line
+
+        self.parent.wCommand.value = ''
 
 
-class DataController(npyscreen.NPSFilteredDataBase):
-    def filter_data(self):
-        self.parent.wStatus2.value = self._filter
+# class DataController(npyscreen.NPSFilteredDataBase):
+#     def filter_data(self):
+#         self.parent.wStatus2.value = self._filter
         # if self._filter and self.get_all_values():
         #     return [x for x in self.get_all_values() if self._filter in x]
         # else:
         #     return self.get_all_values()
 
 
+class MyTextCommandBox(npyscreen.TextCommandBox):
+    def __init__(self, screen,
+                history=True,
+                history_max=1000,  # todo make persistent
+                set_up_history_keys=True,
+                *args, **kwargs):
+        super(MyTextCommandBox, self).__init__(screen, history, history_max, set_up_history_keys, *args, **kwargs)
+
+
 class FmSearchActive(npyscreen.FormMuttActive):
     ACTION_CONTROLLER = ActionControllerSearch
     MAIN_WIDGET_CLASS = npyscreen.GridColTitles
     MAIN_WIDGET_CLASS_START_LINE = 2
-    STATUS_WIDGET_CLASS = npyscreen.TextCommandBox
+    STATUS_WIDGET_CLASS = npyscreen.Textfield
     STATUS_WIDGET_X_OFFSET = 0
-    COMMAND_WIDGET_CLASS = npyscreen.Textfield
+    COMMAND_WIDGET_CLASS = MyTextCommandBox
     COMMAND_WIDGET_NAME = 'Search'
     COMMAND_WIDGET_BEGIN_ENTRY_AT = None
     COMMAND_ALLOW_OVERRIDE_BEGIN_ENTRY_AT = True
 
-    DATA_CONTROLER = DataController
+    # DATA_CONTROLER = DataController
 
 
 
