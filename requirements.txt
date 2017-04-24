@@ -1,1 +1,3 @@
 asciimatics
+toolz
+npyscreen
