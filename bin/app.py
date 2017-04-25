@@ -234,14 +234,20 @@ print(server.search(['KEYWORD', 'test']))
 #     else:
 #         continue
 #
-m140 = server.fetch([160], data=['ENVELOPE', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
+
+message_id = 154
+
+m140 = server.fetch([message_id], data=['ENVELOPE', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
 # m140 = server.fetch([messages[-4]], data=['RFC822'])
 import base64
-bs = m140[160][b'BODYSTRUCTURE'][0]
+
+bodystructure_ = m140[message_id][b'BODYSTRUCTURE']
+
 from pprint import pprint
 
 
-def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
+def walk_parts(msg: BodyData, msgid, download_attachments=None):
+
 
     text = ''
     html = ''
@@ -250,11 +256,14 @@ def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
     if download_attachments is None:
         download_attachments = []
 
-    stack = [(m, str(n)) for n, m in enumerate(msg, 1)]
+    if not msg.is_multipart:
+        stack = [(msg, '1')]
+    else:
+        stack = [(m, str(n)) for n, m in enumerate(msg[0], 1)]
     flattened_parts = []
     while stack:  # flatten message parts and enumerate them
         part, body_number = stack.pop()
-        if part.is_multipart:
+        if part and part.is_multipart:
             for subpart in part:
                 if type(subpart) == list:
                     for i, s in enumerate(subpart, 1):
@@ -288,8 +297,8 @@ def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
 
         else:
             if body_number == '1':
-                BODY = 'BODY.PEEK[1] <0.{}>'.format(peek) if peek > 0 else 'BODY[1]'.format(peek)
-                key = b'BODY[1]<0>' if peek > 0 else b'BODY[1]'
+                BODY = 'BODY[1]'
+                key = b'BODY[1]'
                 if content_type == 'text/plain':  # .get_content_type()
                     text = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
                     continue
@@ -311,13 +320,13 @@ def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
 
                     break
 
-    pprint(attachments)
+    print(text, html, attachments)
     return text, html, attachments
 
 # msg = email.message_from_string(m140[140][b'BODYSTRUCTURE'].decode('utf8'))
 
-text, html, attachments = walk_parts(bs, msgid=160)
-text, html, attachments = walk_parts(bs, msgid=160, download_attachments=['1546085.pdf'])
+text, html, attachments = walk_parts(bodystructure_, msgid=message_id)
+# text, html, attachments = walk_parts(bs, msgid=message_id, download_attachments=['1546085.pdf'])
 
 exit(1)
 # for part in msg.walk():
@@ -452,27 +461,27 @@ def process_flags(data) -> str:
 #
 #
 
-
-def write_file(filename, addr, data):
-    os.chdir(addr)
-    fd = open(filename, "wb")
-    fd.write(data)
-    fd.close()
-
-
-def gen_filename(name, mtyp, addr, date, n):
-    timepart = strftime("%d %b %y %H_%M_%S")
-    file = email.Header.decode_header(name)[0][0]
-    file = os.path.basename(file)
-    print("Saved attachment  " + file + "  from  " + addr)
-
-    path = os.path.join(AttachDir, file)
-    pre, ext = os.path.splitext(file)
-    pre = pre + "_" + timepart
-    path = '%s%s' % (os.path.join(AttachDir, pre), ext)
-    return path
-
 #
+# def write_file(filename, addr, data):
+#     os.chdir(addr)
+#     fd = open(filename, "wb")
+#     fd.write(data)
+#     fd.close()
+#
+#
+# def gen_filename(name, mtyp, addr, date, n):
+#     timepart = strftime("%d %b %y %H_%M_%S")
+#     file = email.Header.decode_header(name)[0][0]
+#     file = os.path.basename(file)
+#     print("Saved attachment  " + file + "  from  " + addr)
+#
+#     path = os.path.join(AttachDir, file)
+#     pre, ext = os.path.splitext(file)
+#     pre = pre + "_" + timepart
+#     path = '%s%s' % (os.path.join(AttachDir, pre), ext)
+#     return path
+#
+# #
 # def walk_parts(msg, addr, date, count, msgnum):
 #     for part in msg.walk():
 #         if part.is_multipart():
