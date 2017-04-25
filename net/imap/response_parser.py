@@ -147,7 +147,6 @@ def parse_fetch_response(text, normalise_times=True, uid_is_key=True):
                 msg_data[word] = _convert_ENVELOPE(value, normalise_times)
             elif word in (b'BODY', b'BODYSTRUCTURE'):
                 msg_data[word] = BodyData.create(value)
-                msg_data['RAW'] = text
             else:
                 msg_data[word] = value
 

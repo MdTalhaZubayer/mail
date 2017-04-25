@@ -234,94 +234,90 @@ print(server.search(['KEYWORD', 'test']))
 #     else:
 #         continue
 #
-#m140 = server.fetch([messages[-1]], data=['ENVELOPE', 'BODY', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
-m140 = server.fetch([messages[-4]], data=['RFC822'])
+m140 = server.fetch([160], data=['ENVELOPE', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
+# m140 = server.fetch([messages[-4]], data=['RFC822'])
+import base64
+bs = m140[160][b'BODYSTRUCTURE'][0]
+from pprint import pprint
 
 
+def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
 
-def walk_parts(msg):
-    for part in msg.walk():
+    text = None
+    html = None
+    attachments = {}
 
-        print(part.get_content_type())
+    if download_attachments is None:
+        download_attachments = []
 
-
-    for part in msg.walk():
-        if part.is_multipart():
+    stack = [(m, str(n)) for n, m in enumerate(msg, 1)]
+    flattened_parts = []
+    while stack:  # flatten message parts and enumerate them
+        part, body_number = stack.pop()
+        if part.is_multipart:
+            for subpart in part:
+                if type(subpart) == list:
+                    for i, s in enumerate(subpart, 1):
+                        stack.append((s, body_number + '.' + str(i)))
             continue
-        dtypes = part.get_params(None, 'Content-Disposition')
-        if not dtypes:
-            if part.get_content_type() == 'text/plain':  # .get_content_type()
-                continue
+        flattened_parts.append((part, body_number))
 
-            ctypes = part.get_params()
+    for part, body_number in flattened_parts:
+
+        dtypes = part.dtypes
+        content_type = part.content_type
+
+        if dtypes:
+            for key, filename in dtypes.items():
+                key = key.lower()
+                data = None
+                if key == b'filename':
+                    if filename.decode('utf8') in download_attachments:
+                        BODY = 'BODY[{}]'.format(body_number).encode('utf8')
+                        data = server.fetch([msgid], data=[BODY])[msgid][BODY]
+                        decoder = part[5]
+                        with open(filename.decode('utf8'), 'wb') as f:
+                            if decoder == b'base64':
+                                f.write(base64.b64decode(data))
+                            else:
+                                pass
+
+                    attachments[filename.decode('utf8')] = (content_type, part.size, data)
+
+        else:
+            if body_number == 1:
+                BODY = 'BODY.PEEK[1] <0.{}>'.format(peek) if peek > 0 else 'BODY[1]'.format(peek)
+                key = b'BODY[1]<0>' if peek > 0 else b'BODY[1]'
+                if content_type == 'text/plain':  # .get_content_type()
+                    text = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
+                    continue
+                if content_type == 'text/html':  # .get_content_type()
+                    html = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
+                    continue
+            else:
+                pass
+
+            ctypes = part.ctypes
             if not ctypes:
                 continue
-            for key, val in ctypes:
-                if key.lower() == 'name':
-                    filename = gen_filename(val, part.get_content_type(), count)
+            for key, val in ctypes.items():
+                if key.lower() == b'name':
+                    filename = val.decode('utf8')
+
+                    BODY = 'BODY[{}]'.format(body_number).encode('utf8')
+                    m = server.fetch([msgid], data=[BODY])[msgid]
+
                     break
-            else:
-                continue
-        else:
-            attachment, filename = None, None
-            for key, val in dtypes:
-                key = key.lower()
-                if key == 'filename':
-                    filename = val
-                if key == 'attachment':
-                    attachment = 1
-            if not attachment:
-                continue
-            filename = gen_filename(filename, part.get_content_type(), count)
 
-        try:
-            data = part.get_payload(decode=1)
-        except:
-            typ, val = sys.exc_info()[:2]
-            print("Message %s attachment decode error: for %s ``%s''"
-                 % (str(val), part.get_content_type(), filename))
-            continue
-
-        if not data:
-            print("Could not decode attachment %s for %s" % (part.get_content_type(), filename))
-            continue
-
-        if type(data) is type(msg):
-            count = walk_parts(data)
-            continue
-
-        if True:  # save attacj
-            exists = "0"
-
-            print(data) # contains
-
-            # try:
-            #     curdir = os.getcwd()
-            #     list = os.listdir('.\\')
-            #     for name in list:
-            #         if name == addr:
-            #             exists = "1"
-            #             break
-            #     if exists == "1":
-            #         write_file(filename, addr, data)
-            #         os.chdir(curdir)
-            #     else:
-            #         os.mkdir(addr)
-            #         write_file(filename, addr, data)
-            #         os.chdir(curdir)
-            #         exists == "0"
-            #         os.chdir(curdir)
-            # except IOError:
-            #     print('Could not create "%s":' % (filename))
-
-
-
-
-
+    pprint(attachments)
+    return text, html, attachments
 
 # msg = email.message_from_string(m140[140][b'BODYSTRUCTURE'].decode('utf8'))
 
-walk_parts(m140)
+text, html, attachments = walk_parts(bs, msgid=160)
+text, html, attachments = walk_parts(bs, msgid=160, download_attachments=['1546085.pdf'])
+
+exit(1)
 # for part in msg.walk():
 #     if part.is_multipart():
 #         continue
