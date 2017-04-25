@@ -1,8 +1,7 @@
+# coding=utf-8
 import curses
-
 import npyscreen
-
-from bin.app import server
+# from bin.app import server
 from net.imap.search_constants import process_command
 from net.imap.util import process_from, process_subject, process_body, process_flags, process_size
 
