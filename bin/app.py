@@ -33,6 +33,8 @@ m140 = server.fetch([message_id], data=['ENVELOPE', 'BODYSTRUCTURE', 'FLAGS', 'R
 bodystructure_ = m140[message_id][b'BODYSTRUCTURE']
 
 text, attachments = walk_parts(bodystructure_, msgid=message_id, server=server)
+print(text, attachments)
+exit(1)
 
 if __name__ == "__main__":
     App = MailBox()
