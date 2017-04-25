@@ -296,8 +296,8 @@ def walk_parts(msg: BodyData, msgid, download_attachments=None):
                     attachments[filename.decode('utf8')] = (content_type, part.size, decoded_data)
 
         else:
-            if body_number == '1':
-                BODY = 'BODY[1]'
+            if body_number.startswith('1'):
+                BODY = 'BODY[1]'  # use correct
                 key = b'BODY[1]'
                 if content_type == 'text/plain':  # .get_content_type()
                     text = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
@@ -306,7 +306,9 @@ def walk_parts(msg: BodyData, msgid, download_attachments=None):
                     html = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
                     continue
             else:
-                pass
+                BODY = 'BODY[{}]'.format(body_number).encode('utf8')
+                server.fetch([msgid], data=[BODY])[msgid]
+                continue
 
             ctypes = part.ctypes
             if not ctypes:
