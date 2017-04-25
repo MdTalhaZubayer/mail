@@ -243,8 +243,8 @@ from pprint import pprint
 
 def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
 
-    text = None
-    html = None
+    text = ''
+    html = ''
     attachments = {}
 
     if download_attachments is None:
@@ -270,22 +270,24 @@ def walk_parts(msg: BodyData, msgid, peek=64, download_attachments=None):
         if dtypes:
             for key, filename in dtypes.items():
                 key = key.lower()
-                data = None
+                decoded_data = None
                 if key == b'filename':
                     if filename.decode('utf8') in download_attachments:
                         BODY = 'BODY[{}]'.format(body_number).encode('utf8')
                         data = server.fetch([msgid], data=[BODY])[msgid][BODY]
                         decoder = part[5]
-                        with open(filename.decode('utf8'), 'wb') as f:
-                            if decoder == b'base64':
-                                f.write(base64.b64decode(data))
-                            else:
-                                pass
 
-                    attachments[filename.decode('utf8')] = (content_type, part.size, data)
+                        if decoder == b'base64':
+                            decoded_data = base64.b64decode(data)
+                        else:
+                            pass
+                        with open(filename.decode('utf8'), 'wb') as f:
+                            f.write(decoded_data)
+
+                    attachments[filename.decode('utf8')] = (content_type, part.size, decoded_data)
 
         else:
-            if body_number == 1:
+            if body_number == '1':
                 BODY = 'BODY.PEEK[1] <0.{}>'.format(peek) if peek > 0 else 'BODY[1]'.format(peek)
                 key = b'BODY[1]<0>' if peek > 0 else b'BODY[1]'
                 if content_type == 'text/plain':  # .get_content_type()
