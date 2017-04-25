@@ -1,22 +1,19 @@
 # coding=utf-8
 import argparse
+import base64
 import curses
 import datetime
-import email
 import imaplib
-import os
 from email.header import decode_header, make_header
 import sys
-from time import strftime
-from typing import List
-
+from typing import List, Tuple, Iterable
 import toolz
 import npyscreen
 from net.imap.imapclient import IMAPClient
 from net.imap.response_types import Address, BodyData
 
+
 IMAP_SEARCH_FIELDS = {
-    # 'ALL': str,
     'ANSWERED': None,
     'BCC': str,
     'BEFORE': datetime.date,
@@ -220,34 +217,16 @@ print(server.search(['KEYWORD', 'test']))
 
 server.remove_flags([1], ['test'])
 print(server.search(['KEYWORD', 'test']))
-#
-# y = server.fetch([140,141], data=['ENVELOPE', 'BODY', 'HEADER', 'FLAGS', 'RFC822.SIZE'])
-# y = server.fetch([140,141], data=['BODY.PEEK[TEXT]', 'FLAGS', 'RFC822.SIZE'])
-# body = ''
-# mail = email.message_from_bytes(y[140][b'BODY[TEXT]'])
-# for part in mail.walk():
-#     c_type = part.get_content_type()
-#     c_disp = part.get('Content-Disposition')
-#
-#     if c_type == 'text/plain' and c_disp == None:
-#         body = body + '\n' + part.get_payload()
-#     else:
-#         continue
-#
 
-message_id = 154
+
+message_id = 151
 
 m140 = server.fetch([message_id], data=['ENVELOPE', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
-# m140 = server.fetch([messages[-4]], data=['RFC822'])
-import base64
 
 bodystructure_ = m140[message_id][b'BODYSTRUCTURE']
 
-from pprint import pprint
-
 
 def walk_parts(msg: BodyData, msgid, download_attachments=None):
-
 
     text = ''
     html = ''
@@ -256,22 +235,7 @@ def walk_parts(msg: BodyData, msgid, download_attachments=None):
     if download_attachments is None:
         download_attachments = []
 
-    if not msg.is_multipart:
-        stack = [(msg, '1')]
-    else:
-        stack = [(m, str(n)) for n, m in enumerate(msg[0], 1)]
-    flattened_parts = []
-    while stack:  # flatten message parts and enumerate them
-        part, body_number = stack.pop()
-        if part and part.is_multipart:
-            for subpart in part:
-                if type(subpart) == list:
-                    for i, s in enumerate(subpart, 1):
-                        stack.append((s, body_number + '.' + str(i)))
-            continue
-        flattened_parts.append((part, body_number))
-
-    for part, body_number in flattened_parts:
+    for part, body_number in flatten_message(msg):
 
         dtypes = part.dtypes
         content_type = part.content_type
@@ -297,18 +261,26 @@ def walk_parts(msg: BodyData, msgid, download_attachments=None):
 
         else:
             if body_number.startswith('1'):
-                BODY = 'BODY[1]'  # use correct
-                key = b'BODY[1]'
-                if content_type == 'text/plain':  # .get_content_type()
-                    text = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
+                BODY = 'BODY[{}]'.format(body_number)  # use correct
+                key = BODY.encode('utf8')
+
+                decoder = part[5]
+                charset = part[2][1].decode('utf8')
+
+                if content_type in ['text/plain', 'text/html'] and not text:  # .get_content_type()
+                    data = server.fetch([msgid], data=[BODY])[msgid][key]
+
+                    if decoder == b'base64':
+                        decoded_data = base64.b64decode(data)
+                    else:
+                        decoded_data = data
+
+                    text = decoded_data.decode(charset)
+
                     continue
-                if content_type == 'text/html':  # .get_content_type()
-                    html = server.fetch([msgid], data=[BODY])[msgid][key].decode('utf8')
-                    continue
-            else:
-                BODY = 'BODY[{}]'.format(body_number).encode('utf8')
-                server.fetch([msgid], data=[BODY])[msgid]
-                continue
+                # if not text and content_type == 'text/html':  # .get_content_type()
+                #     html = server.fetch([msgid], data=[BODY])[msgid][key].decode(charset).encode('utf8')
+                #     continue
 
             ctypes = part.ctypes
             if not ctypes:
@@ -324,6 +296,25 @@ def walk_parts(msg: BodyData, msgid, download_attachments=None):
 
     print(text, html, attachments)
     return text, html, attachments
+
+
+def flatten_message(msg: BodyData) -> Iterable[Tuple[BodyData, str]]:
+    if not msg.is_multipart:
+        stack = [(msg, '1')]
+    else:
+        stack = [(m, str(n)) for n, m in enumerate(msg[0], 1)]
+    flattened_parts = []
+    while stack:  # flatten message parts and enumerate them
+        part, body_number = stack.pop()
+        if part and part.is_multipart:
+            for subpart in part:
+                if type(subpart) == list:
+                    for i, s in enumerate(subpart, 1):
+                        stack.append((s, body_number + '.' + str(i)))
+            continue
+        flattened_parts.append((part, body_number))
+    return reversed(flattened_parts)
+
 
 # msg = email.message_from_string(m140[140][b'BODYSTRUCTURE'].decode('utf8'))
 
