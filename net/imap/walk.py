@@ -50,8 +50,8 @@ def walk_parts(msg: BodyData, msgid, server, download_attachments=None) -> Tuple
                             decoded_data = base64.b64decode(data)
                         else:
                             pass
-                        with open(filename.decode('utf8'), 'wb') as f:
-                            f.write(decoded_data)
+                        # with open(filename.decode('utf8'), 'wb') as f:
+                        #     f.write(decoded_data)
 
                     attachments[filename.decode('utf8')] = (content_type, part.size, decoded_data)
 

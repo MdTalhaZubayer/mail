@@ -26,6 +26,10 @@ print(server.search(['KEYWORD', 'test']))
 
 # server = get_server()
 
+
+
+
+
 message_id = 151
 
 m140 = server.fetch([message_id], data=['ENVELOPE', 'BODYSTRUCTURE', 'FLAGS', 'RFC822.SIZE'])
