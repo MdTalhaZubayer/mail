@@ -17,14 +17,6 @@ with open('users.json') as f:
     config = json.loads(f.read())
 
 
-PDFSANDWITCH = '/Users/christian/src/pdfsandwich/pdfsandwich'
-CONVERT = '/usr/local/bin/convert'
-TESSERACT = '/usr/local/bin/tesseract'
-GS = '/usr/local/bin/gs'
-PDFUNITE = '/usr/local/bin/pdfunite'
-UNPAPER = '/usr/local/bin/unpaper'
-
-
 def main():
     for username, userconf in config['users'].items():
         process_user(username, **userconf)
@@ -59,20 +51,8 @@ def process_user(username: str, receiver: str, password: str, imap: str, smtp: s
                         continue
                     f.write(attachment[2])
 
-                    # my_env = os.environ.copy()
-                    # my_env["PATH"] = "/usr/local/bin/:/usr/sbin:/sbin:" + my_env["PATH"]
-                    # process = subprocess.Popen(
-                    #     [PDFSANDWITCH, path, '-convert', CONVERT, '-tesseract', TESSERACT, '-gs', GS, '-pdfunite',
-                    #      PDFUNITE, '-unpaper', UNPAPER, '-lang', 'deu+fra+eng'], env=my_env)
-                    # process.wait()
-
                     process = subprocess.Popen(['/usr/local/bin/ocrmypdf', '-l', 'deu+fra+eng', '--sidecar', output_txt, input_pdf, output_pdf])
                     process.wait()
-
-                # ocr_path = os.path.join(tmpdirname, filename.replace('.pdf', '_ocr.txt'))
-
-                # process = subprocess.Popen(['pdftotext', output_path, ocr_path], env=my_env)
-                # process.wait()
 
                 with open(output_pdf, "rb") as fil:
                     part = MIMEApplication(fil.read(), Name=basename(f.name))
