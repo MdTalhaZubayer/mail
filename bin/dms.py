@@ -51,28 +51,34 @@ def process_user(username: str, receiver: str, password: str, imap: str, smtp: s
         with tempfile.TemporaryDirectory() as tmpdirname:
 
             for filename, attachment in data.items():
-                path = os.path.join(tmpdirname, filename)
-                with open(path, 'wb') as f:
+                input_pdf = os.path.join(tmpdirname, filename)
+                output_pdf = input_pdf.replace('.pdf', '_ocr.pdf')
+                output_txt = input_pdf.replace('.pdf', '.txt')
+                with open(input_pdf, 'wb') as f:
+                    if attachment[2] is None:
+                        continue
                     f.write(attachment[2])
 
-                    my_env = os.environ.copy()
-                    my_env["PATH"] = "/usr/local/bin/:/usr/sbin:/sbin:" + my_env["PATH"]
-                    process = subprocess.Popen(
-                        [PDFSANDWITCH, path, '-convert', CONVERT, '-tesseract', TESSERACT, '-gs', GS, '-pdfunite',
-                         PDFUNITE, '-unpaper', UNPAPER, '-lang', 'deu+fra+eng'], env=my_env)
+                    # my_env = os.environ.copy()
+                    # my_env["PATH"] = "/usr/local/bin/:/usr/sbin:/sbin:" + my_env["PATH"]
+                    # process = subprocess.Popen(
+                    #     [PDFSANDWITCH, path, '-convert', CONVERT, '-tesseract', TESSERACT, '-gs', GS, '-pdfunite',
+                    #      PDFUNITE, '-unpaper', UNPAPER, '-lang', 'deu+fra+eng'], env=my_env)
+                    # process.wait()
+
+                    process = subprocess.Popen(['/usr/local/bin/ocrmypdf', '-l', 'deu+fra+eng', '--sidecar', output_txt, input_pdf, output_pdf])
                     process.wait()
 
-                output_path = os.path.join(tmpdirname, filename.replace('.pdf', '_ocr.pdf'))
-                ocr_path = os.path.join(tmpdirname, filename.replace('.pdf', '_ocr.txt'))
+                # ocr_path = os.path.join(tmpdirname, filename.replace('.pdf', '_ocr.txt'))
 
-                process = subprocess.Popen(['pdftotext', output_path, ocr_path], env=my_env)
-                process.wait()
+                # process = subprocess.Popen(['pdftotext', output_path, ocr_path], env=my_env)
+                # process.wait()
 
-                with open(output_path, "rb") as fil:
+                with open(output_pdf, "rb") as fil:
                     part = MIMEApplication(fil.read(), Name=basename(f.name))
                     part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f.name)
                     msg.attach(part)
-                with open(ocr_path, "rb") as fil:
+                with open(output_txt, "rb") as fil:
                     part = MIMEApplication(fil.read(), Name=basename(f.name.replace('pdf', 'txt')))
                     fil.seek(0)
                     subject = fil.readline().decode('utf8').strip()
